@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useRef, useMemo } from "react"
-import { useFrame } from "@react-three/fiber"
-import * as THREE from "three"
+import { useRef, useMemo } from "react";
+import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 
 const vertexShader = `
   uniform float time;
@@ -20,7 +20,7 @@ const vertexShader = `
     
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
   }
-`
+`;
 
 const fragmentShader = `
   uniform float time;
@@ -47,18 +47,18 @@ const fragmentShader = `
     
     gl_FragColor = vec4(color * glow, glow * 0.8);
   }
-`
+`;
 
 export function ShaderPlane({
   position,
   color1 = "#ff5722",
   color2 = "#ffffff",
 }: {
-  position: [number, number, number]
-  color1?: string
-  color2?: string
+  position: [number, number, number];
+  color1?: string;
+  color2?: string;
 }) {
-  const mesh = useRef<THREE.Mesh>(null)
+  const mesh = useRef<THREE.Mesh>(null);
 
   const uniforms = useMemo(
     () => ({
@@ -68,14 +68,15 @@ export function ShaderPlane({
       color2: { value: new THREE.Color(color2) },
     }),
     [color1, color2],
-  )
+  );
 
   useFrame((state) => {
     if (mesh.current) {
-      uniforms.time.value = state.clock.elapsedTime
-      uniforms.intensity.value = 1.0 + Math.sin(state.clock.elapsedTime * 2) * 0.3
+      uniforms.time.value = state.clock.elapsedTime;
+      uniforms.intensity.value =
+        1.0 + Math.sin(state.clock.elapsedTime * 2) * 0.3;
     }
-  })
+  });
 
   return (
     <mesh ref={mesh} position={position}>
@@ -88,29 +89,35 @@ export function ShaderPlane({
         side={THREE.DoubleSide}
       />
     </mesh>
-  )
+  );
 }
 
 export function EnergyRing({
   radius = 1,
   position = [0, 0, 0],
 }: {
-  radius?: number
-  position?: [number, number, number]
+  radius?: number;
+  position?: [number, number, number];
 }) {
-  const mesh = useRef<THREE.Mesh>(null)
+  const mesh = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
     if (mesh.current) {
-      mesh.current.rotation.z = state.clock.elapsedTime
-      ;(mesh.current.material as THREE.MeshBasicMaterial).opacity = 0.5 + Math.sin(state.clock.elapsedTime * 3) * 0.3
+      mesh.current.rotation.z = state.clock.elapsedTime;
+      (mesh.current.material as THREE.MeshBasicMaterial).opacity =
+        0.5 + Math.sin(state.clock.elapsedTime * 3) * 0.3;
     }
-  })
+  });
 
   return (
     <mesh ref={mesh} position={position}>
       <ringGeometry args={[radius * 0.8, radius, 32]} />
-      <meshBasicMaterial color="#ff5722" transparent opacity={0.6} side={THREE.DoubleSide} />
+      <meshBasicMaterial
+        color="#ff5722"
+        transparent
+        opacity={0.6}
+        side={THREE.DoubleSide}
+      />
     </mesh>
-  )
+  );
 }

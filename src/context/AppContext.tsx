@@ -1,7 +1,7 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from "react";
 
-export type Brand = 'AntiGravity' | 'Lovable' | 'Stitch';
-export type View = 'Dashboard' | 'Events' | 'Tickets' | 'Admin';
+export type Brand = "AntiGravity" | "Lovable" | "Stitch";
+export type View = "Dashboard" | "Events" | "Tickets" | "Admin";
 
 interface AppContextType {
   activeBrand: Brand;
@@ -14,8 +14,8 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [activeBrand, setActiveBrand] = useState<Brand>('AntiGravity');
-  const [activeView, setActiveView] = useState<View>('Dashboard');
+  const [activeBrand, setActiveBrand] = useState<Brand>("AntiGravity");
+  const [activeView, setActiveView] = useState<View>("Dashboard");
   const [experienceCredits] = useState(14500); // Mock credits
 
   return (
@@ -25,7 +25,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setActiveBrand,
         activeView,
         setActiveView,
-        experienceCredits
+        experienceCredits,
       }}
     >
       {children}
@@ -35,6 +35,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAppContext = () => {
   const context = useContext(AppContext);
-  if (!context) throw new Error('useAppContext must be used within AppProvider');
+  if (!context)
+    throw new Error("useAppContext must be used within AppProvider");
   return context;
 };
