@@ -31,7 +31,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
       <div className="relative z-10 w-full max-w-md p-8 rounded-[2rem] border border-white/10 bg-[#1A1A1A]/60 backdrop-blur-xl shadow-2xl overflow-hidden">
         <div className="text-center mb-8">
           <h2 className="text-4xl font-bold text-white mb-3">Vyntra</h2>
-          <p className="text-white/60">Your Agentic CRM Copilot.</p>
+          <p className="text-white/60">Personalised Customer Experience.</p>
         </div>
 
         <AnimatePresence mode="wait">

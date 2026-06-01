@@ -1,4 +1,4 @@
-import { Home, Shield, Search, MessageSquare, Activity } from "lucide-react";
+import { Home, Shield, MessageSquare, Activity } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAppContext, type View } from "../../context/AppContext";
 import { LiquidButton } from "../ui/liquid-glass-button";
@@ -15,7 +15,6 @@ export const Sidebar = () => {
   const navItems: { label: string; icon: React.ReactNode; view: View }[] = [
     { label: "Dashboard", icon: <Home size={20} />, view: "Dashboard" },
     { label: "Agentic Support", icon: <Shield size={20} />, view: "Support" },
-    { label: "AI Search", icon: <Search size={20} />, view: "Search" },
     { label: "Chat Assistant", icon: <MessageSquare size={20} />, view: "Chat" },
     { label: "Telemetry", icon: <Activity size={20} />, view: "Admin" },
   ];

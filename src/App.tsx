@@ -7,7 +7,6 @@ import { VoiceOrb } from "./components/voice/VoiceOrb";
 import { TelemetryDashboard } from "./components/admin/TelemetryDashboard";
 import { SupportDashboard } from "./components/admin/SupportDashboard";
 import { ChatCanvas } from "./components/search/ChatCanvas";
-import { SearchCitations } from "./components/search/SearchCitations";
 import { SmokeBackground } from "./components/ui/spooky-smoke-animation";
 import { GlassFilter } from "./components/ui/liquid-glass";
 import { cn } from "./lib/utils";
@@ -17,7 +16,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { LoginScreen } from "./components/layout/LoginScreen";
 
 const MainLayout = () => {
-  const { activeBrand, activeView } = useAppContext();
+  const { activeBrand, activeView, setIsGuest } = useAppContext();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
 
@@ -43,7 +42,10 @@ const MainLayout = () => {
         {!hasStarted ? (
           <IntroScreen key="intro" onStart={() => setHasStarted(true)} />
         ) : !isAuthenticated ? (
-          <LoginScreen key="login" onLogin={() => setIsAuthenticated(true)} />
+          <LoginScreen key="login" onLogin={(guestMode) => {
+              setIsGuest(guestMode);
+              setIsAuthenticated(true);
+          }} />
         ) : (
           <motion.div
             key="main"
@@ -62,7 +64,6 @@ const MainLayout = () => {
 
                   {/* View State Rendering */}
                   <div className="mt-12 transition-opacity duration-300">
-                    {activeView === "Search" && <SearchCitations />}
                     {activeView === "Chat" && <ChatCanvas />}
                     {activeView === "Admin" && <TelemetryDashboard />}
                     {activeView === "Support" && <SupportDashboard />}

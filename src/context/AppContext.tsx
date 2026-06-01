@@ -19,7 +19,9 @@ interface AppContextType {
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (isOpen: boolean) => void;
 
-  
+  isGuest: boolean;
+  setIsGuest: (val: boolean) => void;
+
   activeOrder: any | null;
   setActiveOrder: (order: any | null) => void;
 
@@ -36,7 +38,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [activeBrand, setActiveBrand] = useState<Brand>("Vyntra");
   const [activeView, setActiveView] = useState<View>("Dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+  const [isGuest, setIsGuest] = useState(false);
   const [activeOrder, setActiveOrder] = useState<any | null>(null);
   const [tasks, setTasks] = useState<string[]>([]);
 
@@ -51,8 +53,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setActiveView,
         isMobileMenuOpen,
         setIsMobileMenuOpen,
-
-        
+        isGuest,
+        setIsGuest,
         activeOrder,
         setActiveOrder,
 
