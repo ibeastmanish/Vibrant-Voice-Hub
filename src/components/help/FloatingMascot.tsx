@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { HelpCircle, RefreshCw, ShoppingBag, Gift } from "lucide-react";
+import { HelpCircle, RefreshCw, ShoppingBag } from "lucide-react";
 import { useVoiceContext } from "../../context/VoiceContext";
 
 export const FloatingMascot = () => {
@@ -9,7 +9,6 @@ export const FloatingMascot = () => {
 
   const fallbacks = [
     { icon: <ShoppingBag size={16} />, label: "Track Active Order" },
-    { icon: <Gift size={16} />, label: "Check Loyalty Credits" },
     { icon: <RefreshCw size={16} />, label: "Refresh Sync" },
   ];
 

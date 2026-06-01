@@ -1,52 +1,65 @@
-import { LayoutDashboard, Settings2, Activity } from "lucide-react";
+import { Home, Shield, Search, MessageSquare, Activity } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAppContext, type View } from "../../context/AppContext";
+import { LiquidButton } from "../ui/liquid-glass-button";
 
 export const Sidebar = () => {
-  const { activeBrand, activeView, setActiveView } = useAppContext();
+  const { activeBrand, activeView, setActiveView, isMobileMenuOpen, setIsMobileMenuOpen } = useAppContext();
 
   const brandColors = {
-    AntiGravity: "text-primary",
+    Vyntra: "text-primary",
     Lovable: "text-accent-pink",
     Stitch: "text-accent-green",
   };
 
   const navItems: { label: string; icon: React.ReactNode; view: View }[] = [
-    {
-      label: "Dashboard",
-      icon: <LayoutDashboard size={20} />,
-      view: "Dashboard",
-    },
-    { label: "Event Discovery", icon: <Activity size={20} />, view: "Events" },
-    { label: "Admin Insights", icon: <Settings2 size={20} />, view: "Admin" },
+    { label: "Dashboard", icon: <Home size={20} />, view: "Dashboard" },
+    { label: "Agentic Support", icon: <Shield size={20} />, view: "Support" },
+    { label: "AI Search", icon: <Search size={20} />, view: "Search" },
+    { label: "Chat Assistant", icon: <MessageSquare size={20} />, view: "Chat" },
+    { label: "Telemetry", icon: <Activity size={20} />, view: "Admin" },
   ];
 
   return (
-    <div className="w-64 h-screen bg-black/40 backdrop-blur-xl border-r border-white/10 p-6 flex flex-col justify-between transition-colors duration-500 z-10 shrink-0">
-      <div>
+    <>
+      {/* Mobile Backdrop */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+      
+      <div 
+        className={cn(
+          "w-64 h-screen bg-black/80 md:bg-black/40 backdrop-blur-xl border-r border-white/10 p-6 flex flex-col justify-between transition-transform duration-300 z-50 shrink-0",
+          "fixed md:relative inset-y-0 left-0 transform",
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        )}
+      >
+        <div>
         <div className="flex items-center gap-3 mb-12">
-          <div
-            className={cn(
-              "w-8 h-8 rounded-full bg-current opacity-20",
-              brandColors[activeBrand],
-            )}
-          />
-          <h1 className="text-xl font-bold tracking-tight">
-            Vibrant Voice Hub
+          <h1 className="text-xl font-bold tracking-tight text-white/90">
+            Vyntra
           </h1>
         </div>
 
-        <nav className="space-y-2">
+        <nav className="space-y-4">
           {navItems.map((item) => (
-            <button
+            <LiquidButton
               key={item.label}
-              onClick={() => setActiveView(item.view)}
+              onClick={() => {
+                setActiveView(item.view);
+                setIsMobileMenuOpen(false);
+              }}
               className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300",
+                "w-full rounded-2xl flex items-center justify-start gap-3 px-4 py-3 transition-all duration-300",
                 activeView === item.view
-                  ? "bg-white/10 text-white"
-                  : "text-white/50 hover:text-white hover:bg-white/5",
+                  ? "opacity-100 text-white"
+                  : "opacity-70 hover:opacity-100 text-white/80"
               )}
+              variant="default"
+              size="lg"
             >
               <span
                 className={
@@ -55,8 +68,8 @@ export const Sidebar = () => {
               >
                 {item.icon}
               </span>
-              <span className="font-medium">{item.label}</span>
-            </button>
+              <span className="font-medium text-inherit">{item.label}</span>
+            </LiquidButton>
           ))}
         </nav>
       </div>
@@ -68,5 +81,6 @@ export const Sidebar = () => {
         </span>
       </div>
     </div>
+    </>
   );
 };

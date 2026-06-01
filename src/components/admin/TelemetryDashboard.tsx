@@ -3,9 +3,11 @@ import { motion } from "framer-motion";
 import { Activity, Zap, Cpu } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAppContext } from "../../context/AppContext";
+import { useVoiceContext } from "../../context/VoiceContext";
 
 export const TelemetryDashboard = () => {
   const { activeBrand } = useAppContext();
+  const { auditLogs } = useVoiceContext();
   const [latency, setLatency] = useState(320);
   const [accuracy, setAccuracy] = useState(98.4);
 
@@ -22,7 +24,7 @@ export const TelemetryDashboard = () => {
   }, []);
 
   const brandColors = {
-    AntiGravity: "text-primary border-primary/30",
+    Vyntra: "text-primary border-primary/30",
     Lovable: "text-accent-pink border-accent-pink/30",
     Stitch: "text-accent-green border-accent-green/30",
   };
@@ -122,39 +124,33 @@ export const TelemetryDashboard = () => {
         </div>
       </div>
 
-      {/* Heatmap Section */}
-      <div className="glass-panel p-6 h-64 relative overflow-hidden flex flex-col">
-        <h3 className="text-sm font-mono text-white/50 mb-4">
-          Traffic Heatmap (Agentic Premier League)
-        </h3>
-        <div className="flex-1 relative flex items-end justify-between px-2 pb-2">
-          {Array.from({ length: 40 }).map((_, i) => {
-            const height = Math.random() * 60 + 20;
-            // Simulated spike for "Agentic Premier League"
-            const isSpike = i > 25 && i < 35;
-            const finalHeight = isSpike ? height + 40 : height;
-
-            return (
-              <motion.div
-                key={i}
-                initial={{ height: 0 }}
-                animate={{ height: `${finalHeight}%` }}
-                transition={{ duration: 0.5, delay: i * 0.02 }}
-                className={cn(
-                  "w-[2%] rounded-t-sm transition-colors duration-500",
-                  isSpike
-                    ? "bg-gradient-to-t from-red-600 to-red-400 shadow-[0_0_15px_rgba(255,0,0,0.5)]"
-                    : "bg-white/20",
-                )}
-              />
-            );
-          })}
-        </div>
-        <div className="absolute top-4 right-4 flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_10px_rgba(255,0,0,0.8)] animate-pulse" />
-          <span className="text-xs text-red-400 font-mono">
-            HIGH VOLUME DETECTED
+      {/* Live Audit Terminal Section */}
+      <div className="glass-panel p-6 h-96 relative flex flex-col mt-6">
+        <h3 className="text-sm font-mono text-white/50 mb-4 flex items-center justify-between">
+          <span>Agentic Audit Terminal (Firestore Log Simulator)</span>
+          <span className="flex items-center gap-2 px-2 py-1 bg-green-500/10 text-green-400 border border-green-500/20 rounded-md text-[10px] uppercase">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+            Connected
           </span>
+        </h3>
+        <div className="flex-1 overflow-y-auto font-mono text-xs text-green-400 custom-scrollbar bg-black/50 p-4 rounded-lg border border-white/5">
+          {auditLogs.length === 0 ? (
+            <div className="text-white/30 italic mt-2">&gt; Waiting for agent trajectory logs...</div>
+          ) : (
+            auditLogs.map((log, i) => (
+              <motion.div 
+                key={i} 
+                initial={{ opacity: 0, x: -10 }} 
+                animate={{ opacity: 1, x: 0 }} 
+                className="mb-6 pb-6 border-b border-white/5 last:border-0"
+              >
+                <div className="text-white/50 mb-2">&gt; Received Trajectory Payload [{new Date().toLocaleTimeString()}]</div>
+                <pre className="whitespace-pre-wrap break-words">
+                  {JSON.stringify(log, null, 2)}
+                </pre>
+              </motion.div>
+            ))
+          )}
         </div>
       </div>
     </div>

@@ -1,22 +1,46 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 
-export type Brand = "AntiGravity" | "Lovable" | "Stitch";
-export type View = "Dashboard" | "Events" | "Tickets" | "Admin";
+export type Brand = "Vyntra";
+export type View = "Dashboard" | "Admin" | "Search" | "Support" | "Chat";
+
+export interface Citation {
+  id: number;
+  title: string;
+  url: string;
+  snippet: string;
+}
 
 interface AppContextType {
   activeBrand: Brand;
   setActiveBrand: (brand: Brand) => void;
   activeView: View;
   setActiveView: (view: View) => void;
-  experienceCredits: number;
+
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: (isOpen: boolean) => void;
+
+  
+  activeOrder: any | null;
+  setActiveOrder: (order: any | null) => void;
+
+  tasks: string[];
+  setTasks: (tasks: string[] | ((prev: string[]) => string[])) => void;
+
+  citations: Citation[];
+  setCitations: (citations: Citation[]) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [activeBrand, setActiveBrand] = useState<Brand>("AntiGravity");
+  const [activeBrand, setActiveBrand] = useState<Brand>("Vyntra");
   const [activeView, setActiveView] = useState<View>("Dashboard");
-  const [experienceCredits] = useState(14500); // Mock credits
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const [activeOrder, setActiveOrder] = useState<any | null>(null);
+  const [tasks, setTasks] = useState<string[]>([]);
+
+  const [citations, setCitations] = useState<Citation[]>([]);
 
   return (
     <AppContext.Provider
@@ -25,7 +49,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setActiveBrand,
         activeView,
         setActiveView,
-        experienceCredits,
+        isMobileMenuOpen,
+        setIsMobileMenuOpen,
+
+        
+        activeOrder,
+        setActiveOrder,
+
+        tasks,
+        setTasks,
+
+        citations,
+        setCitations,
       }}
     >
       {children}
