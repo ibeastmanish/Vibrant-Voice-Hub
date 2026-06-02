@@ -7,7 +7,7 @@ import { VoiceOrb } from "./components/voice/VoiceOrb";
 import { TelemetryDashboard } from "./components/admin/TelemetryDashboard";
 import { SupportDashboard } from "./components/admin/SupportDashboard";
 import { ChatCanvas } from "./components/search/ChatCanvas";
-import { SmokeBackground } from "./components/ui/spooky-smoke-animation";
+import { ShaderAnimation } from "./components/ui/shader-lines";
 import { GlassFilter } from "./components/ui/liquid-glass";
 import { cn } from "./lib/utils";
 import { useState } from "react";
@@ -16,7 +16,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { LoginScreen } from "./components/layout/LoginScreen";
 
 const MainLayout = () => {
-  const { activeBrand, activeView, setIsGuest } = useAppContext();
+  const { activeBrand, activeView, setIsGuest, setCustomerName, customerName } = useAppContext();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
 
@@ -33,17 +33,20 @@ const MainLayout = () => {
       )}
     >
       {/* Ambient Mesh Graphics */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
-          <SmokeBackground smokeColor="#FF5722" className="w-full h-full object-cover" />
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-50">
+          <ShaderAnimation />
       </div>
+      {/* Permanent Glassmorphic Backdrop */}
+      <div className="absolute inset-0 z-0 pointer-events-none backdrop-blur-xl bg-black/20" />
       <GlassFilter />
 
       <AnimatePresence mode="wait">
         {!hasStarted ? (
           <IntroScreen key="intro" onStart={() => setHasStarted(true)} />
         ) : !isAuthenticated ? (
-          <LoginScreen key="login" onLogin={(guestMode) => {
-              setIsGuest(guestMode);
+          <LoginScreen key="login" onLogin={(name) => {
+              setCustomerName(name);
+              setIsGuest(false);
               setIsAuthenticated(true);
           }} />
         ) : (
@@ -58,20 +61,48 @@ const MainLayout = () => {
             <div className="flex-1 flex flex-col relative z-10 overflow-hidden">
               <Header />
 
-              <main className="flex-1 overflow-y-auto p-8 custom-scrollbar relative">
-                <div className="max-w-7xl mx-auto pb-32">
-                  <VoiceOrb />
+              <main className={cn(
+                "flex-1 overflow-y-auto p-8 custom-scrollbar relative flex flex-col",
+                activeView === "Dashboard" && "justify-center"
+              )}>
+                <div className={cn(
+                  "w-full max-w-7xl mx-auto",
+                  activeView === "Dashboard" ? "pb-0" : "pb-32"
+                )}>
+                  {activeView !== "Chat" && activeView !== "Support" && (
+                    <div className={cn(
+                      "flex flex-col items-center justify-center transition-all duration-700 w-full",
+                      activeView === "Dashboard" ? "" : "mt-24"
+                    )}>
+                      {activeView === "Dashboard" && (
+                        <motion.h2 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-4xl md:text-5xl font-light text-white tracking-wide text-center mb-8"
+                        >
+                          Welcome <span className="font-semibold">{customerName}</span>!
+                        </motion.h2>
+                      )}
+                      
+                      <VoiceOrb />
+
+                      {activeView === "Dashboard" && (
+                        <motion.p 
+                          initial={{ opacity: 0, y: -20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-lg md:text-xl text-white/50 tracking-wide font-light mt-8"
+                        >
+                          Explore more with vyntra
+                        </motion.p>
+                      )}
+                    </div>
+                  )}
 
                   {/* View State Rendering */}
                   <div className="mt-12 transition-opacity duration-300">
                     {activeView === "Chat" && <ChatCanvas />}
                     {activeView === "Admin" && <TelemetryDashboard />}
                     {activeView === "Support" && <SupportDashboard />}
-                    {activeView === "Dashboard" && (
-                      <div className="text-center mt-20 text-white/40">
-                        <p>Try saying "Show Events" or "Search for latest news"</p>
-                      </div>
-                    )}
                   </div>
                 </div>
               </main>

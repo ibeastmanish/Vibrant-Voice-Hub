@@ -12,6 +12,7 @@ interface VoiceContextProps {
   conversationHistory: {role: string, content: string}[];
   speak: (text: string) => void;
   auditLogs: any[];
+  setAuditLogs: React.Dispatch<React.SetStateAction<any[]>>;
   processIntent: (transcript: string, base64Image?: string) => Promise<void>;
 }
 
@@ -26,7 +27,7 @@ declare global {
 }
 
 export const VoiceProvider = ({ children }: { children: React.ReactNode }) => {
-  const { setActiveView, activeOrder, setActiveOrder, tasks, setTasks } = useAppContext();
+  const { setActiveView, activeOrder, setActiveOrder, tasks, setTasks, customerName } = useAppContext();
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
   const [waveformLevels, setWaveformLevels] = useState<number[]>(Array(24).fill(0.1));
   const [liveTranscript, setLiveTranscript] = useState<string>('');
@@ -78,9 +79,9 @@ export const VoiceProvider = ({ children }: { children: React.ReactNode }) => {
 
   const processIntent = async (transcript: string, base64Image?: string, injectedContext?: string) => {
     try {
-        const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+        const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY || "";
         if (!apiKey) {
-            setLiveTranscript("Missing Groq API Key in .env");
+            setLiveTranscript("Missing OpenRouter API Key");
             setVoiceState('error');
             return;
         }
@@ -92,15 +93,15 @@ export const VoiceProvider = ({ children }: { children: React.ReactNode }) => {
 Current Date: ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.
 CRITICAL PROTOCOL: You are living in the present day. You must NEVER mention a knowledge cutoff date, training data limits, or state that you are an AI. If asked about something you do not know, you MUST NOT hallucinate or invent false information. Instead, trigger a 'WEB_SEARCH' intent to find the answer. If you still cannot find the answer, gracefully admit that you don't have that specific information on hand right now, while maintaining your persona as an elite CRM Copilot.
 
-You are assisting customer: Alex Mercer.
-Customer CRM History: VIP Tier. Lifetime Value: $4,250. Past purchases: MacBook Pro (M3), Noise Cancelling Headphones. Last interaction: "Requested refund process for headphones."
+You are assisting ${customerName}.
+Customer CRM History: New User.
 
 You operate under a strict dual-execution model:
 1. Speak a highly detailed, personalized, and accurate response to the user.
 2. Generate a structured JSON trajectory for the backend to execute tools and sync state.
 
 RULES:
-- CRM COPILOT: Act as a proactive customer success agent. Surface actionable recommendations based on history. Use Alex's name naturally. Provide detailed, personalized responses.
+- CRM COPILOT: Act as a proactive customer success agent. Surface actionable recommendations based on history. Use the name ${customerName} naturally. Provide detailed, personalized responses.
 - MEMORY & CONTEXT: Retain context from previous turns. Reference past interactions or purchases when relevant.
 - MULTI-STEP REASONING: Don't just answer; anticipate follow-ups. If information is missing, explicitly ask clarification questions.
 - ACTION-ORIENTED: You complete tasks. Explicitly invoke tool calls in your JSON when asked.
@@ -141,7 +142,7 @@ Provide your response in strict JSON format matching exactly this schema:
         if (injectedContext) {
             userContent += `\n\n[CRITICAL REAL-TIME WEB SEARCH DATA RETRIEVED: ${injectedContext} \nUse this exact data to answer the user's question confidently. DO NOT say 'I searched the web' or mention Wikipedia, just answer as if you knew it.]`;
         }
-        let model = 'llama-3.3-70b-versatile';
+        let model = 'openai/gpt-4o-mini';
         let useJsonFormat = true;
 
         if (base64Image) {
@@ -188,17 +189,19 @@ Provide your response in strict JSON format matching exactly this schema:
             requestBody.response_format = { type: "json_object" };
         }
 
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
+                'HTTP-Referer': 'http://localhost:5173',
+                'X-Title': 'VoiceFirst CRM',
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(requestBody)
         });
 
         if (!response.ok) {
-            throw new Error(`Groq API Error: ${response.status}`);
+            throw new Error(`OpenRouter API Error: ${response.status}`);
         }
 
         const data = await response.json();
@@ -275,7 +278,7 @@ Provide your response in strict JSON format matching exactly this schema:
                 const mockOrder = {
                     id: `ORD-${Math.floor(Math.random() * 100000)}`,
                     status: detectedIntent === 'CHECK_ORDER' ? 'In Transit' : 'Active',
-                    customerName: 'Alex Mercer',
+                    customerName: 'Guest',
                     lastEvent: 'Global Hyderabad Tech Summit',
                     supportTier: 'VIP',
                     recentQuery: detectedIntent === 'CUSTOMER_SUPPORT' ? transcript : 'Track shipment',
@@ -400,6 +403,7 @@ Provide your response in strict JSON format matching exactly this schema:
         conversationHistory,
         speak,
         auditLogs,
+        setAuditLogs,
         processIntent
     }}>
       {children}

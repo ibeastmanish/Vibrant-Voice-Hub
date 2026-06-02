@@ -130,22 +130,12 @@ const SlideButton = forwardRef<HTMLButtonElement, SlideButtonProps>(
       dragX.set(newX)
     }
 
-    const adjustedWidth = useTransform(springX, (x) => x + 10)
-
     return (
       <motion.div
         animate={completed ? BUTTON_STATES.completed : BUTTON_STATES.initial}
         transition={ANIMATION_CONFIG.spring}
         className="shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] relative flex h-14 items-center justify-center rounded-full bg-white/10 backdrop-blur-md"
       >
-        {!completed && (
-          <motion.div
-            style={{
-              width: adjustedWidth,
-            }}
-            className="absolute inset-y-0 left-0 z-0 rounded-full bg-primary/20 backdrop-blur-md"
-          />
-        )}
         <AnimatePresence key="drag-handle">
           {!completed && (
             <motion.div

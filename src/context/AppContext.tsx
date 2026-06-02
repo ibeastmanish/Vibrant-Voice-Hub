@@ -22,6 +22,9 @@ interface AppContextType {
   isGuest: boolean;
   setIsGuest: (val: boolean) => void;
 
+  customerName: string;
+  setCustomerName: (name: string) => void;
+
   activeOrder: any | null;
   setActiveOrder: (order: any | null) => void;
 
@@ -39,6 +42,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [activeView, setActiveView] = useState<View>("Dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isGuest, setIsGuest] = useState(false);
+  const [customerName, setCustomerName] = useState("Guest");
   const [activeOrder, setActiveOrder] = useState<any | null>(null);
   const [tasks, setTasks] = useState<string[]>([]);
 
@@ -55,6 +59,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setIsMobileMenuOpen,
         isGuest,
         setIsGuest,
+        customerName,
+        setCustomerName,
         activeOrder,
         setActiveOrder,
 

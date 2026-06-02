@@ -7,7 +7,7 @@ import { cn } from '../../lib/utils';
 
 
 
-export const VoiceOrb = () => {
+export const VoiceOrb = ({ className }: { className?: string }) => {
   const { voiceState, waveformLevels, startListening, stopListening, liveTranscript } = useVoiceContext();
   const { activeBrand } = useAppContext();
 
@@ -20,7 +20,7 @@ export const VoiceOrb = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-2xl mx-auto mt-24">
+    <div className={cn("flex flex-col items-center justify-center w-full max-w-2xl mx-auto", className)}>
       {/* Floating Orb */}
       <motion.div
         animate={{ 

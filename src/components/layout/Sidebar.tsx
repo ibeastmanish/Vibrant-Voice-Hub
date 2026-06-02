@@ -1,4 +1,4 @@
-import { Home, Shield, MessageSquare, Activity } from "lucide-react";
+import { Home, Shield, MessageSquare, Activity, LogOut } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAppContext, type View } from "../../context/AppContext";
 import { LiquidButton } from "../ui/liquid-glass-button";
@@ -31,7 +31,7 @@ export const Sidebar = () => {
       
       <div 
         className={cn(
-          "w-64 h-screen bg-black/80 md:bg-black/40 backdrop-blur-xl border-r border-white/10 p-6 flex flex-col justify-between transition-transform duration-300 z-50 shrink-0",
+          "w-64 h-screen bg-white/5 backdrop-blur-xl border-r border-white/10 p-6 flex flex-col justify-between transition-transform duration-300 z-50 shrink-0",
           "fixed md:relative inset-y-0 left-0 transform",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
@@ -73,11 +73,25 @@ export const Sidebar = () => {
         </nav>
       </div>
 
-      <div className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-xl border border-white/5">
-        <div className="w-2 h-2 rounded-full bg-accent-green animate-pulse-fast" />
-        <span className="text-sm font-medium text-white/70">
-          System Node: Ready
-        </span>
+      <div className="flex flex-col gap-3">
+        <LiquidButton
+          onClick={() => window.location.reload()}
+          className="w-full rounded-xl flex items-center justify-start gap-3 px-4 py-3 opacity-70 hover:opacity-100 text-white/80 transition-all duration-300"
+          variant="default"
+          size="lg"
+        >
+          <span className="text-red-400">
+            <LogOut size={20} />
+          </span>
+          <span className="font-medium text-inherit">Log Out</span>
+        </LiquidButton>
+
+        <div className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-xl border border-white/5">
+          <div className="w-2 h-2 rounded-full bg-accent-green animate-pulse-fast" />
+          <span className="text-sm font-medium text-white/70">
+            System Node: Ready
+          </span>
+        </div>
       </div>
     </div>
     </>

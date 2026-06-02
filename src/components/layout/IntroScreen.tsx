@@ -17,7 +17,7 @@ export const IntroScreen: React.FC<IntroScreenProps> = ({ onStart }) => {
     >
       <div className="flex-1 flex flex-col items-center justify-center w-full">
         <GooeyText
-          texts={["Vyntra", "Personal", "Voice", "Assistant"]}
+          texts={["Vyntra", "Customer", "Experience"]}
           morphTime={1}
           cooldownTime={0.4}
           className="mb-8"

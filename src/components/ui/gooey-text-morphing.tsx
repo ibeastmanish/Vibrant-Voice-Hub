@@ -29,11 +29,11 @@ export function GooeyText({
 
     const setMorph = (fraction: number) => {
       if (text1Ref.current && text2Ref.current) {
-        text2Ref.current.style.filter = `blur(${Math.min(8 / fraction - 8, 100)}px)`;
+        text2Ref.current.style.filter = `blur(${Math.min(8 / fraction - 8, 20)}px)`;
         text2Ref.current.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
 
         fraction = 1 - fraction;
-        text1Ref.current.style.filter = `blur(${Math.min(8 / fraction - 8, 100)}px)`;
+        text1Ref.current.style.filter = `blur(${Math.min(8 / fraction - 8, 20)}px)`;
         text1Ref.current.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
       }
     };
@@ -111,13 +111,12 @@ export function GooeyText({
 
       <div
         className="flex items-center justify-center h-24"
-        style={{ filter: "url(#threshold)" }}
       >
         <span
           ref={text1Ref}
           className={cn(
             "absolute inline-block select-none text-center text-5xl md:text-6xl font-bold tracking-tighter",
-            "text-white",
+            "text-white p-8 outline-none whitespace-pre-line leading-tight",
             textClassName
           )}
         />
@@ -125,7 +124,7 @@ export function GooeyText({
           ref={text2Ref}
           className={cn(
             "absolute inline-block select-none text-center text-5xl md:text-6xl font-bold tracking-tighter",
-            "text-white",
+            "text-white p-8 outline-none whitespace-pre-line leading-tight",
             textClassName
           )}
         />
