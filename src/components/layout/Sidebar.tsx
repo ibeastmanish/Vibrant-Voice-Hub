@@ -88,7 +88,10 @@ export const Sidebar = () => {
           />
 
           <ButtonColorful
-            onClick={() => window.location.reload()}
+            onClick={() => {
+              localStorage.clear();
+              window.location.reload();
+            }}
             className="w-full rounded-xl"
             label="Log Out"
             icon={<LogOut size={16} className="text-white/90" />}

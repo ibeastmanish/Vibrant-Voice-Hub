@@ -14,7 +14,7 @@ import { NewsFeed } from "./components/dashboard/NewsFeed";
 import { ShaderAnimation } from "./components/ui/shader-lines";
 import { GlassFilter } from "./components/ui/liquid-glass";
 import { cn } from "./lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { LoginScreen } from "./components/layout/LoginScreen";
 
@@ -36,9 +36,21 @@ const MainLayout = () => {
     setIsGuest,
     hasSelectedInterests,
   } = useAppContext();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
-  const [hasStarted, setHasStarted] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem("isAuthenticated") === "true");
+  const [hasAcceptedTerms, setHasAcceptedTerms] = useState(() => localStorage.getItem("hasAcceptedTerms") === "true");
+  const [hasStarted, setHasStarted] = useState(() => localStorage.getItem("hasStarted") === "true");
+
+  useEffect(() => {
+    localStorage.setItem("isAuthenticated", isAuthenticated.toString());
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    localStorage.setItem("hasAcceptedTerms", hasAcceptedTerms.toString());
+  }, [hasAcceptedTerms]);
+
+  useEffect(() => {
+    localStorage.setItem("hasStarted", hasStarted.toString());
+  }, [hasStarted]);
 
   // Text size map: 1=xs 2=sm 3=base 4=lg 5=xl
   const textSizeClass =

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 
 export type Brand = "Vyntra";
 export type View = "Dashboard" | "Search" | "Support" | "Chat" | "Accessibility" | "Profile";
@@ -62,7 +62,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [activeView, setActiveView] = useState<View>("Dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isGuest, setIsGuest] = useState(false);
-  const [customerName, setCustomerName] = useState("Guest");
+  const [customerName, setCustomerName] = useState(() => localStorage.getItem("customerName") || "Guest");
   const [activeOrder, setActiveOrder] = useState<any | null>(null);
   const [tasks, setTasks] = useState<string[]>([]);
 
@@ -73,10 +73,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
 
-  const [hasSelectedInterests, setHasSelectedInterests] = useState(false);
+  const [hasSelectedInterests, setHasSelectedInterests] = useState(() => localStorage.getItem("hasSelectedInterests") === "true");
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [discountCode, setDiscountCode] = useState<{ code: string; percentage: number; reason: string } | null>(null);
   const [voiceLang, setVoiceLang] = useState("en-US");
+
+  useEffect(() => {
+    localStorage.setItem("customerName", customerName);
+  }, [customerName]);
+
+  useEffect(() => {
+    localStorage.setItem("hasSelectedInterests", hasSelectedInterests.toString());
+  }, [hasSelectedInterests]);
 
   return (
     <AppContext.Provider
