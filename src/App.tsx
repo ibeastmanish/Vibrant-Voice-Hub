@@ -19,6 +19,8 @@ import { LoginScreen } from "./components/layout/LoginScreen";
 import { useVoiceContext } from "./context/VoiceContext";
 import { Play } from "lucide-react";
 import { ToastContainer } from "./components/ui/Toast";
+import { QuickActions } from "./components/voice/QuickActions";
+import { ConversationPanel } from "./components/voice/ConversationPanel";
 
 const DemoButton = () => {
   const { processIntent } = useVoiceContext();
@@ -130,28 +132,41 @@ const MainLayout = () => {
                     isFullscreen && "pb-0 h-full flex flex-col"
                   )}
                 >
-                  {/* Dashboard / orb view */}
+                  {/* Dashboard view */}
                   {activeView === "Dashboard" && (
-                    <div className="flex flex-col items-center w-full min-h-[calc(100vh-10rem)] justify-center">
-                      <motion.h2
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-4xl md:text-5xl font-light text-white tracking-wide text-center mb-8"
-                      >
-                        Welcome <span className="font-semibold">{customerName}</span>!
-                      </motion.h2>
+                    <div className="flex flex-col items-center w-full">
 
-                      <VoiceOrb />
+                      {/* Hero section — orb + greeting + controls tightly grouped */}
+                      <div className="flex flex-col items-center justify-center pt-6 pb-4 w-full">
+                        <motion.div
+                          initial={{ opacity: 0, y: 12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-center mb-8"
+                        >
+                          <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
+                            Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 17 ? "afternoon" : "evening"},{" "}
+                            <span className="bg-gradient-to-r from-violet-400 via-purple-300 to-indigo-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(167,139,250,0.6)]">
+                              {customerName}
+                            </span>
+                            <span className="text-white">!</span>
+                          </h1>
+                          <p className="text-white/30 text-sm mt-2 font-medium tracking-wide">Your AI assistant is ready</p>
+                        </motion.div>
 
-                      {/* Demo button for judges */}
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.5 }}
-                        className="mt-6"
-                      >
-                        <DemoButton />
-                      </motion.div>
+                        <VoiceOrb />
+
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.4 }}
+                          className="mt-5"
+                        >
+                          <DemoButton />
+                        </motion.div>
+
+                        {/* Quick Actions — tap to speak shortcuts */}
+                        <QuickActions />
+                      </div>
 
                       {!focusMode && <NewsFeed />}
                     </div>
@@ -177,6 +192,7 @@ function App() {
     <AppProvider>
       <VoiceProvider>
         <ToastContainer />
+        <ConversationPanel />
         <MainLayout />
       </VoiceProvider>
     </AppProvider>

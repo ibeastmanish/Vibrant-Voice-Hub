@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Eye, Type, Volume2, Zap, Focus, MousePointer, Check } from "lucide-react";
+import { Eye, Type, Volume2, Zap, Focus, MousePointer, Check, Globe } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
 
 // Reusable toggle row
@@ -49,6 +49,7 @@ export const AccessibilityScreen = () => {
     reducedMotion, setReducedMotion,
     focusMode, setFocusMode,
     textSize, setTextSize,
+    voiceLang, setVoiceLang,
   } = useAppContext();
 
   return (
@@ -163,6 +164,41 @@ export const AccessibilityScreen = () => {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Voice Language */}
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl space-y-4">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2 bg-cyan-500/20 rounded-xl">
+            <Globe className="text-cyan-400" size={20} />
+          </div>
+          <h3 className="text-lg font-semibold text-white">Voice Language</h3>
+        </div>
+        <p className="text-white/40 text-sm">Aura will listen and respond in your selected language.</p>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { label: "English (US)", flag: "🇺🇸", value: "en-US" },
+            { label: "Hindi", flag: "🇮🇳", value: "hi-IN" },
+            { label: "Spanish", flag: "🇪🇸", value: "es-ES" },
+            { label: "French", flag: "🇫🇷", value: "fr-FR" },
+            { label: "German", flag: "🇩🇪", value: "de-DE" },
+            { label: "Japanese", flag: "🇯🇵", value: "ja-JP" },
+          ].map((lang) => (
+            <button
+              key={lang.value}
+              onClick={() => setVoiceLang(lang.value)}
+              className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                voiceLang === lang.value
+                  ? "bg-cyan-600 text-white shadow-[0_0_12px_rgba(6,182,212,0.35)]"
+                  : "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
+              }`}
+            >
+              <span className="text-lg">{lang.flag}</span>
+              <span>{lang.label}</span>
+              {voiceLang === lang.value && <Check size={14} className="ml-auto" />}
+            </button>
+          ))}
         </div>
       </div>
 

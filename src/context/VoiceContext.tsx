@@ -66,6 +66,7 @@ export const VoiceProvider = ({ children }: { children: React.ReactNode }) => {
     setTasks,
     customerName,
     setDiscountCode,
+    voiceLang,
   } = useAppContext();
 
   const [voiceState, setVoiceState] = useState<VoiceState>("idle");
@@ -437,7 +438,7 @@ Customer's task list: ${JSON.stringify(tasks)}`;
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
-      recognition.lang = "en-US";
+      recognition.lang = voiceLang;
 
       recognition.onresult = async (event: any) => {
         const transcript = event.results[0][0].transcript;

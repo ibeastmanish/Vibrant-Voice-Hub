@@ -87,37 +87,37 @@ export const VoiceOrb = ({ className }: { className?: string }) => {
       </motion.div>
 
       {/* Real-time Waveform Visualization */}
-      <div className="h-24 mt-12 flex items-center justify-center gap-1 w-full overflow-hidden px-8">
+      <div className="h-14 mt-4 flex items-center justify-center gap-[3px] w-full overflow-hidden px-12">
         {waveformLevels.map((level, i) => (
           <motion.div
             key={i}
             animate={{ height: `${level * 100}%` }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
             className={cn(
-              "w-2 rounded-full min-h-[4px] transition-colors duration-500",
+              "w-1.5 rounded-full min-h-[3px] transition-colors duration-500",
               userSentiment === 'Frustrated' ? "bg-red-500" :
               userSentiment === 'Positive' ? "bg-green-500" :
               activeBrand === 'Vyntra' ? "bg-primary" :
               activeBrand === 'Lovable' ? "bg-accent-pink" : 
               "bg-accent-green",
-              voiceState === 'idle' ? 'opacity-30' : 'opacity-100'
+              voiceState === 'idle' ? 'opacity-20' : 'opacity-100'
             )}
           />
         ))}
       </div>
 
       {/* Live Transcription Display */}
-      <div className="mt-8 w-full max-w-md relative z-20 min-h-[60px] flex items-center justify-center text-center">
+      <div className="mt-3 w-full max-w-md relative z-20 min-h-[36px] flex items-center justify-center text-center">
         <AnimatePresence mode="wait">
           {(voiceState === 'listening' || voiceState === 'processing' || liveTranscript) ? (
             <motion.div
               key="transcription"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              exit={{ opacity: 0, y: -6 }}
             >
-              <p className="text-xl font-medium text-white/90">
-                {liveTranscript || (voiceState === 'listening' ? "Listening..." : "Processing...")}
+              <p className="text-base font-medium text-white/80">
+                {liveTranscript || (voiceState === 'listening' ? "Listening…" : "Processing…")}
               </p>
             </motion.div>
           ) : (
@@ -127,7 +127,7 @@ export const VoiceOrb = ({ className }: { className?: string }) => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <p className="text-white/40 font-medium">Click the orb to start listening</p>
+              <p className="text-white/30 text-sm">Press <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-white/50 font-mono text-xs">Space</kbd> or click to speak</p>
             </motion.div>
           )}
         </AnimatePresence>

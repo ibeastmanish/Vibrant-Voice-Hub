@@ -50,6 +50,9 @@ interface AppContextType {
 
   discountCode: { code: string; percentage: number; reason: string } | null;
   setDiscountCode: (val: { code: string; percentage: number; reason: string } | null) => void;
+
+  voiceLang: string;
+  setVoiceLang: (lang: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -73,6 +76,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [hasSelectedInterests, setHasSelectedInterests] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [discountCode, setDiscountCode] = useState<{ code: string; percentage: number; reason: string } | null>(null);
+  const [voiceLang, setVoiceLang] = useState("en-US");
 
   return (
     <AppContext.Provider
@@ -112,6 +116,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
         discountCode,
         setDiscountCode,
+
+        voiceLang,
+        setVoiceLang,
       }}
     >
       {children}
