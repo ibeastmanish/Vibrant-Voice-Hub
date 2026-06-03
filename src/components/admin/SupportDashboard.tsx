@@ -127,20 +127,35 @@ export const SupportDashboard = () => {
       const isApple = lowerLink.includes("apple");
       
       let storeName = "Online Store";
-      if (isAmazon) storeName = "Amazon";
-      else if (isFlipkart) storeName = "Flipkart";
-      else if (isApple) storeName = "Apple";
-      else if (lowerLink.includes(".")) {
-        const domain = new URL(trackingLink.startsWith("http") ? trackingLink : `https://${trackingLink}`).hostname;
-        storeName = domain.replace("www.", "").split(".")[0];
-        storeName = storeName.charAt(0).toUpperCase() + storeName.slice(1);
+      let finalItem = "Premium Package";
+      let parsedOrderId = `ORD-${Math.floor(Math.random() * 10000)}-${storeName.substring(0, 2).toUpperCase()}`;
+
+      // 1. Check if input looks like an Order ID (alphanumeric with hyphens/hash, no spaces, not a URL)
+      const isOrderId = /^[#A-Za-z0-9-]+$/.test(trackingLink.trim()) && !trackingLink.includes('http') && !trackingLink.includes('.com');
+
+      if (isOrderId) {
+        // If it's an Order ID, we simulate pulling the associated product
+        parsedOrderId = trackingLink.toUpperCase().replace(/^#/, ''); // Remove leading hash if any
+        storeName = parsedOrderId.startsWith("114-") ? "Amazon" : "Partner Network";
+        const randomItems = ["Apple Watch Series 9", "Sony PlayStation 5", "Dyson Airwrap", "Samsung Galaxy S24 Ultra", "Nike Air Jordan 1"];
+        finalItem = randomItems[Math.floor(Math.random() * randomItems.length)];
+      } else {
+        // 2. Otherwise, treat it as a URL or search query
+        if (isAmazon) storeName = "Amazon";
+        else if (isFlipkart) storeName = "Flipkart";
+        else if (isApple) storeName = "Apple";
+        else if (lowerLink.includes(".")) {
+          const domain = new URL(trackingLink.startsWith("http") ? trackingLink : `https://${trackingLink}`).hostname;
+          storeName = domain.replace("www.", "").split(".")[0];
+          storeName = storeName.charAt(0).toUpperCase() + storeName.slice(1);
+        }
+        
+        const extractedProduct = extractProductFromUrl(trackingLink);
+        finalItem = extractedProduct || (isAmazon ? "Sony WH-1000XM5 Headphones" : "Premium Wireless Earbuds");
       }
       
-      const extractedProduct = extractProductFromUrl(trackingLink);
-      const finalItem = extractedProduct || (isAmazon ? "Sony WH-1000XM5 Headphones" : "Premium Wireless Earbuds");
-      
       setOrder({
-        id: `ORD-${Math.floor(Math.random() * 10000)}-${storeName.substring(0, 2).toUpperCase()}`,
+        id: parsedOrderId,
         item: finalItem,
         status: "in_transit",
         currentLocation: isAmazon ? "Dispatch Center, Bangalore" : "Sorting Hub, Mumbai",
@@ -236,10 +251,10 @@ export const SupportDashboard = () => {
                   <Link size={18} />
                 </div>
                 <input
-                  type="url"
+                  type="text"
                   value={trackingLink}
                   onChange={(e) => setTrackingLink(e.target.value)}
-                  placeholder="e.g., https://amazon.com/orders/123..."
+                  placeholder="e.g., Tracking Link or Order ID (#ORD-123)"
                   className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-24 text-white placeholder:text-white/30 focus:outline-none focus:border-cyan-500/50 transition-colors"
                   required
                 />
