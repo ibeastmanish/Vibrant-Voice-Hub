@@ -1,4 +1,4 @@
-import { Home, MessageSquare, Accessibility, User, LogOut, Package } from "lucide-react";
+import { Home, MessageSquare, Accessibility, User, LogOut, Bell } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAppContext, type View } from "../../context/AppContext";
 import { LiquidButton } from "../ui/liquid-glass-button";
@@ -19,7 +19,7 @@ export const Sidebar = () => {
   const navItems: { label: string; icon: React.ReactNode; view: View }[] = [
     { label: "Dashboard", icon: <Home size={20} />, view: "Dashboard" },
     { label: "Ask Aura", icon: <MessageSquare size={20} />, view: "Chat" },
-    { label: "Orders & Support", icon: <Package size={20} />, view: "Support" },
+    { label: "Reminders", icon: <Bell size={20} />, view: "Support" },
     { label: "Accessibility", icon: <Accessibility size={20} />, view: "Accessibility" },
   ];
 
