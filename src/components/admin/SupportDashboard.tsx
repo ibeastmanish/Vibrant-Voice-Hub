@@ -69,7 +69,14 @@ export const SupportDashboard = () => {
 
   const handleAddReminder = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!reminderText.trim() || !reminderTime) return;
+    if (!reminderText.trim()) {
+      addToast({ type: "error", title: "Error", description: "Please enter a reminder note." });
+      return;
+    }
+    if (!reminderTime) {
+      addToast({ type: "error", title: "Error", description: "Please select a valid time." });
+      return;
+    }
 
     // Create timestamp for today at the specified time
     const [hours, minutes] = reminderTime.split(":").map(Number);
@@ -138,7 +145,7 @@ export const SupportDashboard = () => {
             </div>
           </div>
 
-          <form onSubmit={handleAddReminder} className="flex flex-col md:flex-row gap-4 items-end">
+          <form onSubmit={handleAddReminder} noValidate className="flex flex-col md:flex-row gap-4 items-end">
             <div className="flex-1 w-full space-y-2">
               <label className="text-xs font-semibold text-white/40 uppercase tracking-widest pl-1">Reminder Note</label>
               <input
@@ -147,7 +154,6 @@ export const SupportDashboard = () => {
                 onChange={(e) => setReminderText(e.target.value)}
                 placeholder="e.g., Check delivery status, Take medication..."
                 className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 focus:outline-none focus:border-violet-500/50 transition-colors"
-                required
               />
             </div>
             <div className="w-full md:w-auto space-y-2">
@@ -157,7 +163,6 @@ export const SupportDashboard = () => {
                 value={reminderTime}
                 onChange={(e) => setReminderTime(e.target.value)}
                 className="w-full md:w-40 bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-violet-500/50 transition-colors [color-scheme:dark]"
-                required
               />
             </div>
             <div className="w-full md:w-auto flex items-center h-[54px] bg-white/5 rounded-xl border border-white/10 px-4 gap-3">
