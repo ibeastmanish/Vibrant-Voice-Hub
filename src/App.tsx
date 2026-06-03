@@ -8,6 +8,7 @@ import { SupportDashboard } from "./components/admin/SupportDashboard";
 import { ChatCanvas } from "./components/search/ChatCanvas";
 import { AccessibilityScreen } from "./components/accessibility/AccessibilityScreen";
 import { ProfileScreen } from "./components/profile/ProfileScreen";
+import { TermsScreen } from "./components/onboarding/TermsScreen";
 import { InterestsScreen } from "./components/onboarding/InterestsScreen";
 import { NewsFeed } from "./components/dashboard/NewsFeed";
 import { ShaderAnimation } from "./components/ui/shader-lines";
@@ -36,6 +37,7 @@ const MainLayout = () => {
     hasSelectedInterests,
   } = useAppContext();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
 
   // Text size map: 1=xs 2=sm 3=base 4=lg 5=xl
@@ -81,6 +83,23 @@ const MainLayout = () => {
               setIsAuthenticated(true);
             }}
           />
+        ) : !hasAcceptedTerms ? (
+          <motion.div
+            key="terms"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="w-full h-full"
+          >
+            <TermsScreen
+              onAccept={() => setHasAcceptedTerms(true)}
+              onDecline={() => {
+                setIsAuthenticated(false);
+                setCustomerName("");
+                setIsGuest(true);
+              }}
+            />
+          </motion.div>
         ) : !hasSelectedInterests ? (
           <motion.div
             key="interests"
