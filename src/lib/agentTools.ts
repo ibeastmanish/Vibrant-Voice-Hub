@@ -42,6 +42,18 @@ export const TOOL_DEFINITIONS = [
   {
     type: "function",
     function: {
+      name: "get_local_weather",
+      description:
+        "Get live current weather conditions for the user's exact current physical location using GPS. Useful when the user asks 'what's the weather here' or 'fetch weather from my location'.",
+      parameters: {
+        type: "object",
+        properties: {},
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "get_exchange_rate",
       description:
         "Get live real-time currency exchange rates between two currencies.",
@@ -172,6 +184,7 @@ export const TOOL_DEFINITIONS = [
 export type ToolName =
   | "search_web"
   | "get_weather"
+  | "get_local_weather"
   | "get_exchange_rate"
   | "issue_discount_code"
   | "create_reminder"
@@ -182,6 +195,7 @@ export type ToolName =
 export const TOOL_ICONS: Record<ToolName, string> = {
   search_web: "🔍",
   get_weather: "🌤️",
+  get_local_weather: "📍",
   get_exchange_rate: "💱",
   issue_discount_code: "🎟️",
   create_reminder: "📝",
@@ -193,6 +207,7 @@ export const TOOL_ICONS: Record<ToolName, string> = {
 export const TOOL_LABELS: Record<ToolName, string> = {
   search_web: "Searching the web",
   get_weather: "Fetching live weather",
+  get_local_weather: "Locating & fetching weather",
   get_exchange_rate: "Getting exchange rate",
   issue_discount_code: "Issuing discount code",
   create_reminder: "Creating reminder",

@@ -137,6 +137,41 @@ export const VoiceProvider = ({ children }: { children: React.ReactNode }) => {
             });
           }
 
+          // ── Local Weather (GPS) ───────────────────────────────────────────
+          case "get_local_weather": {
+            return new Promise((resolve) => {
+              if (!navigator.geolocation) {
+                resolve("Geolocation is not supported by your browser.");
+                return;
+              }
+              navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                  try {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+                    const wRes = await fetch(
+                      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&temperature_unit=celsius`
+                    );
+                    const wData = await wRes.json();
+                    const c = wData.current;
+                    resolve(JSON.stringify({
+                      location: "Your current location",
+                      temperature: `${c.temperature_2m}°C`,
+                      humidity: `${c.relative_humidity_2m}%`,
+                      wind: `${c.wind_speed_10m} km/h`,
+                      condition: getWeatherCondition(c.weather_code),
+                    }));
+                  } catch (e) {
+                    resolve("Error fetching local weather data.");
+                  }
+                },
+                (err) => {
+                  resolve(`Could not get location: ${err.message}`);
+                }
+              );
+            });
+          }
+
           // ── Exchange rates (ExchangeRate-API — free) ─────────────────────
           case "get_exchange_rate": {
             const res = await fetch(
@@ -601,6 +636,8 @@ function summariseResult(tool: ToolName, raw: string): string {
         return "Found web results ✓";
       case "get_weather":
         return `${data.city}: ${data.temperature}, ${data.condition}`;
+      case "get_local_weather":
+        return `Local Weather: ${data.temperature}, ${data.condition}`;
       case "get_exchange_rate":
         return `1 ${data.from} = ${data.rate} ${data.to}`;
       case "issue_discount_code":
