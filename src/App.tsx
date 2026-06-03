@@ -18,6 +18,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { LoginScreen } from "./components/layout/LoginScreen";
 import { useVoiceContext } from "./context/VoiceContext";
 import { Play } from "lucide-react";
+import { ToastContainer } from "./components/ui/Toast";
 
 const DemoButton = () => {
   const { processIntent } = useVoiceContext();
@@ -175,6 +176,7 @@ function App() {
   return (
     <AppProvider>
       <VoiceProvider>
+        <ToastContainer />
         <MainLayout />
       </VoiceProvider>
     </AppProvider>

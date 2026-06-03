@@ -14,6 +14,7 @@ import {
   getWeatherCondition,
   type ToolName,
 } from "../lib/agentTools";
+import { addToast } from "../components/ui/Toast";
 
 export type VoiceState = "idle" | "listening" | "processing" | "error";
 export type UserSentiment = "Positive" | "Neutral" | "Frustrated" | "Unknown";
@@ -68,6 +69,9 @@ export const VoiceProvider = ({ children }: { children: React.ReactNode }) => {
   } = useAppContext();
 
   const [voiceState, setVoiceState] = useState<VoiceState>("idle");
+  const voiceStateRef = useRef<VoiceState>("idle");
+  // Keep ref in sync with state for use in event listeners
+  useEffect(() => { voiceStateRef.current = voiceState; }, [voiceState]);
   const [waveformLevels, setWaveformLevels] = useState<number[]>(
     Array(24).fill(0.1)
   );
@@ -374,6 +378,14 @@ Customer's task list: ${JSON.stringify(tasks)}`;
           const result = await executeTool(name, args);
           setAuditLogs((prev) => [...prev, { tool: name, args, result }]);
 
+          // Fire a toast for each tool result
+          const summary = summariseResult(name, result);
+          addToast({
+            type: name === "issue_discount_code" ? "discount" : "success",
+            title: `${TOOL_ICONS[name] ?? "⚙️"} ${TOOL_LABELS[name] ?? name}`,
+            description: summary,
+          });
+
           // Update thought to done
           setAgentThoughts((prev) =>
             prev.map((t) =>
@@ -452,8 +464,19 @@ Customer's task list: ${JSON.stringify(tasks)}`;
       synthRef.current = window.speechSynthesis;
     }
 
-    // Demo shortcut for judges
+    // Space bar → toggle voice
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if typing in an input
+      if ((e.target as HTMLElement)?.tagName === "INPUT" || (e.target as HTMLElement)?.tagName === "TEXTAREA") return;
+      if (e.code === "Space" && !e.ctrlKey && !e.shiftKey) {
+        e.preventDefault();
+        if (voiceStateRef.current === "idle" || voiceStateRef.current === "error") {
+          startListening();
+        } else {
+          stopListening();
+        }
+      }
+      // Demo shortcut for judges
       if (e.ctrlKey && e.shiftKey && e.key === "F") {
         const demo =
           "I ordered a high-end laptop but the box arrived completely empty! I am absolutely furious. What kind of service is this?";
@@ -470,7 +493,10 @@ Customer's task list: ${JSON.stringify(tasks)}`;
   const speak = (text: string) => {
     if (synthRef.current) {
       synthRef.current.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
+      // Truncate to first 80 words for voice — avoids 3-minute monologues
+      const words = text.split(" ");
+      const spoken = words.length > 80 ? words.slice(0, 80).join(" ") + "…" : text;
+      const utterance = new SpeechSynthesisUtterance(spoken);
       utterance.onend = () => {
         setVoiceState("idle");
         setLiveTranscript("");

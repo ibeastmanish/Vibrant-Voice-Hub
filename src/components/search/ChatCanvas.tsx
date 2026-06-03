@@ -10,11 +10,11 @@ export const ChatCanvas = () => {
   const { customerName } = useAppContext();
   
   const suggestions = [
-    "Where is my recent order?",
+    "What's the weather in Mumbai right now?",
+    "Search for the latest AI news",
+    "What's the USD to INR exchange rate?",
     "I want to return my last purchase",
-    "What is my loyalty tier and points?",
-    "How do I contact Amazon support?",
-    "Set a reminder to follow up tomorrow",
+    "Set a reminder to follow up with support tomorrow",
   ];
 
   return (

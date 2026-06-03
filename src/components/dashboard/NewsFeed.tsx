@@ -104,37 +104,52 @@ export const NewsFeed = () => {
         <h3 className="text-2xl font-semibold text-white/90 mb-6 px-2">What's New</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {news.map((item, index) => (
-                <motion.a 
+                <motion.div
                     key={index}
-                    href={item.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:bg-white/10 transition-colors flex flex-col group cursor-pointer"
+                    className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:bg-white/10 transition-colors flex flex-col group relative"
                 >
                     {item.imageUrl && (
-                        <div className="w-full h-40 overflow-hidden bg-black">
-                            <img 
-                                src={item.imageUrl} 
-                                alt={item.title} 
+                        <a href={item.link} target="_blank" rel="noopener noreferrer" className="w-full h-40 overflow-hidden bg-black block">
+                            <img
+                                src={item.imageUrl}
+                                alt={item.title}
                                 className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
                             />
-                        </div>
+                        </a>
                     )}
                     <div className="p-5 flex flex-col flex-1">
                         <div className="text-xs text-blue-400 font-medium mb-2 uppercase tracking-wide">
                             {item.source} • {item.date}
                         </div>
-                        <h4 className="text-white font-semibold line-clamp-2 mb-2 leading-tight">
-                            {item.title}
-                        </h4>
-                        <p className="text-white/50 text-sm line-clamp-3">
+                        <a href={item.link} target="_blank" rel="noopener noreferrer" className="flex-1">
+                            <h4 className="text-white font-semibold line-clamp-2 mb-2 leading-tight hover:text-primary transition-colors">
+                                {item.title}
+                            </h4>
+                        </a>
+                        <p className="text-white/50 text-sm line-clamp-2 mb-3">
                             {item.snippet}
                         </p>
+                        {/* Read aloud button */}
+                        <button
+                            onClick={() => {
+                                if (window.speechSynthesis) {
+                                    window.speechSynthesis.cancel();
+                                    const u = new SpeechSynthesisUtterance(`${item.title}. ${item.snippet}`);
+                                    u.rate = 1.05;
+                                    window.speechSynthesis.speak(u);
+                                }
+                            }}
+                            className="flex items-center gap-1.5 text-xs text-white/40 hover:text-primary transition-colors mt-auto w-fit"
+                            aria-label="Read article aloud"
+                        >
+                            <span>🔊</span>
+                            <span>Read aloud</span>
+                        </button>
                     </div>
-                </motion.a>
+                </motion.div>
             ))}
         </div>
     </div>

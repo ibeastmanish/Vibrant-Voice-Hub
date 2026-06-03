@@ -1,11 +1,32 @@
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, Loader2 } from "lucide-react";
+import { CheckCircle, Loader2, X } from "lucide-react";
 import { useVoiceContext } from "../../context/VoiceContext";
 import { useAppContext } from "../../context/AppContext";
 
 export const AgentThoughts = () => {
   const { agentThoughts } = useVoiceContext();
-  const { discountCode } = useAppContext();
+  const { discountCode, setDiscountCode, customerName } = useAppContext();
+  const hasGreeted = useRef(false);
+
+  // Fix 3: Proactive greeting when dashboard first loads
+  useEffect(() => {
+    if (hasGreeted.current) return;
+    hasGreeted.current = true;
+    // Small delay to let TTS voices load
+    const timer = setTimeout(() => {
+      if (window.speechSynthesis) {
+        const greeting = `Hi ${customerName}! I'm Aura, your personal customer experience assistant. I can track orders, search the web, check the weather, process refunds, and much more — all by voice. Just click the orb or press Space to get started.`;
+        const utterance = new SpeechSynthesisUtterance(greeting);
+        const voices = window.speechSynthesis.getVoices();
+        const preferred = voices.find(v => v.name.includes("Samantha") || v.name.includes("Google US English"));
+        if (preferred) utterance.voice = preferred;
+        utterance.rate = 1.05;
+        window.speechSynthesis.speak(utterance);
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [customerName]);
 
   if (agentThoughts.length === 0 && !discountCode) return null;
 
@@ -40,15 +61,26 @@ export const AgentThoughts = () => {
         ))}
       </AnimatePresence>
 
-      {/* Discount code banner */}
+      {/* Discount code banner — now dismissible */}
       <AnimatePresence>
         {discountCode && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="rounded-2xl border border-yellow-500/30 bg-yellow-500/10 backdrop-blur-xl px-5 py-4"
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="rounded-2xl border border-yellow-500/30 bg-yellow-500/10 backdrop-blur-xl px-5 py-4 relative"
           >
-            <div className="flex items-center justify-between gap-3">
+            {/* Dismiss button */}
+            <button
+              onClick={() => setDiscountCode(null)}
+              className="absolute top-3 right-3 text-yellow-400/50 hover:text-yellow-400 transition-colors"
+              aria-label="Dismiss discount code"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="flex items-center gap-3 pr-6">
+              <span className="text-3xl">🎟️</span>
               <div>
                 <p className="text-yellow-300 font-bold text-lg tracking-widest">
                   {discountCode.code}
@@ -57,7 +89,6 @@ export const AgentThoughts = () => {
                   {discountCode.percentage}% off · {discountCode.reason}
                 </p>
               </div>
-              <span className="text-3xl">🎟️</span>
             </div>
           </motion.div>
         )}
