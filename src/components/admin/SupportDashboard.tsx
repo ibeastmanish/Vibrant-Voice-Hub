@@ -1,208 +1,382 @@
-import { motion } from "framer-motion";
-import { Package, Truck, CheckCircle2, Clock, MapPin, AlertCircle, HeadphonesIcon, RotateCcw, MessageSquare, ChevronRight } from "lucide-react";
-import { useAppContext } from "../../context/AppContext";
-import { useVoiceContext } from "../../context/VoiceContext";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Package, Truck, CheckCircle2, Clock, MapPin, Search, Bell, Plus, Trash2, Link } from "lucide-react";
+import { addToast } from "../ui/Toast";
+
+// Generate a simple beep using Web Audio API
+const playBeep = () => {
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 note
+    
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.5);
+    
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.5);
+  } catch (e) {
+    console.error("Audio beep failed", e);
+  }
+};
+
+interface TrackedOrder {
+  id: string;
+  item: string;
+  status: "processing" | "in_transit" | "delivered";
+  currentLocation: string;
+  estimatedDelivery: string;
+  total: string;
+  date: string;
+  store: string;
+}
+
+interface Reminder {
+  id: string;
+  text: string;
+  time: number; // timestamp
+  completed: boolean;
+}
 
 export const SupportDashboard = () => {
-  const { activeOrder, setActiveView } = useAppContext();
-  const { processIntent } = useVoiceContext();
+  // Order Tracking State
+  const [trackingLink, setTrackingLink] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [order, setOrder] = useState<TrackedOrder | null>(null);
 
-  // Mock order details if context has none
-  const order = activeOrder || {
-    id: "ORD-9981-MX",
-    status: "in_transit",
-    date: "Oct 24, 2023",
-    total: "$1,299.00",
-    item: "MacBook Pro M3 (14-inch, Space Black)",
-    estimatedDelivery: "Tomorrow, by 8:00 PM",
-    currentLocation: "Sorting Facility, Mumbai",
+  // Reminders State
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [reminderText, setReminderText] = useState("");
+  const [reminderTime, setReminderTime] = useState(""); // HH:MM string for today
+  
+  // Interval for checking reminders
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      setReminders(prev => {
+        let changed = false;
+        const updated = prev.map(r => {
+          if (!r.completed && now >= r.time) {
+            changed = true;
+            playBeep();
+            addToast({
+              type: "info",
+              title: "Reminder",
+              description: r.text
+            });
+            return { ...r, completed: true };
+          }
+          return r;
+        });
+        return changed ? updated : prev;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleTrackOrder = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!trackingLink.trim()) return;
+
+    setIsAnalyzing(true);
+    setOrder(null);
+
+    // Simulate AI parsing the URL and extracting order details
+    setTimeout(() => {
+      const isAmazon = trackingLink.toLowerCase().includes("amazon");
+      const isFlipkart = trackingLink.toLowerCase().includes("flipkart");
+      
+      const storeName = isAmazon ? "Amazon" : isFlipkart ? "Flipkart" : "Online Store";
+      
+      setOrder({
+        id: `ORD-${Math.floor(Math.random() * 10000)}-${storeName.substring(0, 2).toUpperCase()}`,
+        item: isAmazon ? "Sony WH-1000XM5 Headphones" : "Nike Air Force 1",
+        status: "in_transit",
+        currentLocation: isAmazon ? "Dispatch Center, Bangalore" : "Sorting Hub, Mumbai",
+        estimatedDelivery: "Tomorrow, by 9:00 PM",
+        total: isAmazon ? "$348.00" : "$120.00",
+        date: new Date().toLocaleDateString(),
+        store: storeName,
+      });
+      setIsAnalyzing(false);
+      setTrackingLink("");
+      addToast({
+        type: "success",
+        title: "Order Tracked",
+        description: "Details extracted successfully."
+      });
+    }, 2500);
+  };
+
+  const handleAddReminder = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reminderText.trim() || !reminderTime) return;
+
+    // Create timestamp for today at the specified time
+    const [hours, minutes] = reminderTime.split(":").map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+    
+    // If the time has already passed today, set it for tomorrow
+    if (date.getTime() <= Date.now()) {
+      date.setDate(date.getDate() + 1);
+    }
+
+    const newReminder: Reminder = {
+      id: Math.random().toString(36).substr(2, 9),
+      text: reminderText.trim(),
+      time: date.getTime(),
+      completed: false,
+    };
+
+    setReminders(prev => [...prev, newReminder].sort((a, b) => a.time - b.time));
+    setReminderText("");
+    setReminderTime("");
+    addToast({
+      type: "success",
+      title: "Reminder Set",
+      description: `Alert scheduled for ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+    });
+  };
+
+  const removeReminder = (id: string) => {
+    setReminders(prev => prev.filter(r => r.id !== id));
   };
 
   const trackingSteps = [
-    { id: 1, label: "Order Placed", date: "Oct 24", completed: true },
-    { id: 2, label: "Processing", date: "Oct 25", completed: true },
-    { id: 3, label: "In Transit", date: "Oct 26", completed: order.status === "in_transit" || order.status === "delivered", current: order.status === "in_transit" },
-    { id: 4, label: "Delivered", date: "Est. Tomorrow", completed: order.status === "delivered", current: order.status === "delivered" },
+    { id: 1, label: "Order Placed", date: order?.date, completed: true },
+    { id: 2, label: "Processing", date: "Verified", completed: true },
+    { id: 3, label: "In Transit", date: "Active", completed: order?.status === "in_transit" || order?.status === "delivered", current: order?.status === "in_transit" },
+    { id: 4, label: "Delivered", date: "Pending", completed: order?.status === "delivered", current: order?.status === "delivered" },
   ];
-
-  const quickLinks = [
-    { icon: <RotateCcw size={18} />, label: "Initiate Return or Refund", query: "I want to return an item or get a refund." },
-    { icon: <Truck size={18} />, label: "Modify Delivery Address", query: "Can I change the delivery address for my current order?" },
-    { icon: <AlertCircle size={18} />, label: "Report a Missing Item", query: "I received my order but an item is missing." },
-    { icon: <HeadphonesIcon size={18} />, label: "Connect to Human Agent", query: "Connect me to a human support agent immediately." },
-  ];
-
-  const handleSupportAction = (query: string) => {
-    setActiveView("Chat");
-    setTimeout(() => {
-      processIntent(query);
-    }, 500);
-  };
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto w-full pb-12 mt-4 text-left">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold text-white tracking-tight">Orders & Support</h1>
-        <p className="text-white/40 text-sm">Track your deliveries and get instant help from Aura.</p>
+        <h1 className="text-3xl font-bold text-white tracking-tight">Smart Hub</h1>
+        <p className="text-white/40 text-sm">Track your orders via links and set personal reminders.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        {/* Left Column: Order Tracking */}
-        <div className="lg:col-span-2 space-y-6">
-          
+        {/* Left Column: Smart Order Tracking */}
+        <div className="space-y-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/[0.03] border border-white/10 rounded-3xl p-6 md:p-8 backdrop-blur-xl relative overflow-hidden"
+            className="bg-white/[0.03] border border-white/10 rounded-3xl p-6 md:p-8 backdrop-blur-xl relative overflow-hidden h-full flex flex-col"
           >
-            {/* Ambient glow */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-[100px] pointer-events-none" />
 
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2.5 bg-cyan-500/20 rounded-xl">
-                    <Package className="text-cyan-400" size={24} />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold text-white">Active Order</h2>
-                    <p className="text-sm text-cyan-400/80 font-mono tracking-wider">{order.id}</p>
-                  </div>
-                </div>
+            <div className="flex items-center gap-3 mb-6 relative z-10">
+              <div className="p-2.5 bg-cyan-500/20 rounded-xl">
+                <Package className="text-cyan-400" size={24} />
               </div>
-              
-              <div className="text-left md:text-right">
-                <p className="text-white/50 text-sm mb-1">Expected Delivery</p>
-                <p className="text-white font-semibold text-lg">{order.estimatedDelivery}</p>
+              <div>
+                <h2 className="text-xl font-semibold text-white">AI Order Tracker</h2>
+                <p className="text-sm text-white/40">Paste a link to extract and track</p>
               </div>
             </div>
 
-            <div className="p-4 bg-black/20 rounded-2xl border border-white/5 flex items-center gap-4 mb-10">
-              <div className="w-16 h-16 rounded-xl bg-white/5 border border-white/10 shrink-0 flex items-center justify-center overflow-hidden">
-                <span className="text-3xl">💻</span>
-              </div>
-              <div>
-                <p className="text-white/90 font-medium">{order.item}</p>
-                <div className="flex items-center gap-3 mt-1.5 text-xs text-white/40">
-                  <span>{order.date}</span>
-                  <span className="w-1 h-1 rounded-full bg-white/20" />
-                  <span>{order.total}</span>
+            {/* Input Form */}
+            <form onSubmit={handleTrackOrder} className="relative z-10 mb-8">
+              <div className="relative flex items-center">
+                <div className="absolute left-4 text-white/30">
+                  <Link size={18} />
                 </div>
+                <input
+                  type="url"
+                  value={trackingLink}
+                  onChange={(e) => setTrackingLink(e.target.value)}
+                  placeholder="e.g., https://amazon.com/orders/123..."
+                  className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-24 text-white placeholder:text-white/30 focus:outline-none focus:border-cyan-500/50 transition-colors"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={isAnalyzing || !trackingLink.trim()}
+                  className="absolute right-2 px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 disabled:bg-white/10 disabled:text-white/30 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+                >
+                  {isAnalyzing ? "Analyzing..." : "Track"}
+                </button>
               </div>
-            </div>
+            </form>
 
-            {/* Stepper */}
-            <div className="relative mb-6">
-              <div className="absolute top-5 left-6 right-6 h-0.5 bg-white/10" />
+            {/* Loading State */}
+            {isAnalyzing && (
+              <div className="flex-1 flex flex-col items-center justify-center py-12">
+                <div className="w-12 h-12 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin mb-4" />
+                <p className="text-white/60 font-medium">Extracting order details from link...</p>
+                <p className="text-white/30 text-sm mt-1">Analyzing product, status, and delivery date</p>
+              </div>
+            )}
+
+            {/* Result State */}
+            {order && !isAnalyzing && (
               <motion.div 
-                className="absolute top-5 left-6 h-0.5 bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)]"
-                initial={{ width: "0%" }}
-                animate={{ width: "50%" }} // Hardcoded for 'In Transit'
-                transition={{ duration: 1.5, ease: "easeOut" }}
-              />
-
-              <div className="relative flex justify-between">
-                {trackingSteps.map((step) => (
-                  <div key={step.id} className="flex flex-col items-center gap-3 z-10 w-24 text-center">
-                    <div className={`
-                      w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors duration-500
-                      ${step.completed && !step.current ? "bg-cyan-500 border-cyan-500 text-white" : ""}
-                      ${step.current ? "bg-[#0c051c] border-cyan-400 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]" : ""}
-                      ${!step.completed && !step.current ? "bg-[#0c051c] border-white/20 text-white/20" : ""}
-                    `}>
-                      {step.completed && !step.current ? <CheckCircle2 size={20} /> : 
-                       step.current ? <Truck size={20} className="animate-pulse" /> : 
-                       <Clock size={20} />}
-                    </div>
-                    <div>
-                      <p className={`text-sm font-medium ${step.current || step.completed ? "text-white/90" : "text-white/30"}`}>
-                        {step.label}
-                      </p>
-                      <p className="text-[10px] text-white/40 mt-0.5">{step.date}</p>
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex-1 flex flex-col"
+              >
+                <div className="p-4 bg-black/20 rounded-2xl border border-white/5 flex items-center gap-4 mb-8">
+                  <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 shrink-0 flex items-center justify-center overflow-hidden">
+                    <span className="text-2xl">{order.store === "Amazon" ? "📦" : "🛍️"}</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-white/90 font-medium line-clamp-1">{order.item}</p>
+                    <div className="flex items-center justify-between mt-1">
+                      <p className="text-xs text-white/40">{order.store} • {order.id}</p>
+                      <p className="text-xs text-cyan-400 font-medium">{order.estimatedDelivery}</p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
 
-            <div className="flex items-center gap-2 text-sm text-white/50 bg-white/5 w-fit px-4 py-2 rounded-full mt-4">
-              <MapPin size={14} className="text-cyan-400" />
-              <span>Current location: {order.currentLocation}</span>
-            </div>
+                {/* Stepper */}
+                <div className="relative mb-8 mt-4">
+                  <div className="absolute top-5 left-6 right-6 h-0.5 bg-white/10" />
+                  <motion.div 
+                    className="absolute top-5 left-6 h-0.5 bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                    initial={{ width: "0%" }}
+                    animate={{ width: "50%" }} // Hardcoded for 'In Transit'
+                    transition={{ duration: 1.5, ease: "easeOut" }}
+                  />
+
+                  <div className="relative flex justify-between">
+                    {trackingSteps.map((step) => (
+                      <div key={step.id} className="flex flex-col items-center gap-3 z-10 w-20 text-center">
+                        <div className={`
+                          w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors duration-500
+                          ${step.completed && !step.current ? "bg-cyan-500 border-cyan-500 text-white" : ""}
+                          ${step.current ? "bg-[#0c051c] border-cyan-400 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]" : ""}
+                          ${!step.completed && !step.current ? "bg-[#0c051c] border-white/20 text-white/20" : ""}
+                        `}>
+                          {step.completed && !step.current ? <CheckCircle2 size={20} /> : 
+                           step.current ? <Truck size={20} className="animate-pulse" /> : 
+                           <Clock size={20} />}
+                        </div>
+                        <div>
+                          <p className={`text-xs font-medium ${step.current || step.completed ? "text-white/90" : "text-white/30"}`}>
+                            {step.label}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 text-sm text-white/50 bg-white/5 w-full px-4 py-3 rounded-xl mt-auto">
+                  <MapPin size={16} className="text-cyan-400 shrink-0" />
+                  <span className="truncate">Current location: <span className="text-white/80">{order.currentLocation}</span></span>
+                </div>
+              </motion.div>
+            )}
+
+            {!order && !isAnalyzing && (
+              <div className="flex-1 flex flex-col items-center justify-center opacity-30 py-12">
+                <Search size={48} className="mb-4" />
+                <p>Waiting for a tracking link...</p>
+              </div>
+            )}
           </motion.div>
         </div>
 
-        {/* Right Column: Support & Real-time actions */}
+        {/* Right Column: Reminders */}
         <div className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="bg-gradient-to-br from-violet-600/20 to-purple-900/20 border border-purple-500/20 rounded-3xl p-6 backdrop-blur-xl relative overflow-hidden flex flex-col justify-between"
-          >
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <MessageSquare size={100} />
-            </div>
-            
-            <div className="relative z-10 mb-6">
-              <h3 className="text-lg font-semibold text-white mb-2">Need help? Ask Aura</h3>
-              <p className="text-sm text-white/60">Aura is context-aware and knows everything about your active orders.</p>
-            </div>
-
-            <button
-              onClick={() => setActiveView("Chat")}
-              className="relative z-10 w-full py-3 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-medium flex items-center justify-center gap-2 transition-colors shadow-[0_0_20px_rgba(168,85,247,0.3)]"
-            >
-              <MessageSquare size={18} />
-              Open Live Chat
-            </button>
-          </motion.div>
-
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white/[0.03] border border-white/10 rounded-3xl p-6 backdrop-blur-xl"
+            className="bg-white/[0.03] border border-white/10 rounded-3xl p-6 md:p-8 backdrop-blur-xl relative overflow-hidden h-full flex flex-col"
           >
-            <h3 className="text-sm font-semibold text-white/40 uppercase tracking-widest mb-4">Quick Support Actions</h3>
-            <div className="space-y-2">
-              {quickLinks.map((link, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleSupportAction(link.query)}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10 text-left transition-all group"
-                >
-                  <div className="p-2 rounded-lg bg-white/5 text-white/50 group-hover:text-primary group-hover:bg-primary/10 transition-colors">
-                    {link.icon}
-                  </div>
-                  <span className="text-sm font-medium text-white/70 group-hover:text-white flex-1 transition-colors">
-                    {link.label}
-                  </span>
-                  <ChevronRight size={16} className="text-white/20 group-hover:text-white/50 transition-colors" />
-                </button>
-              ))}
-            </div>
-          </motion.div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 rounded-full blur-[100px] pointer-events-none" />
 
-          {/* Real-time metrics widget */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="flex items-center justify-between p-5 bg-black/40 border border-white/5 rounded-2xl backdrop-blur-md"
-          >
-            <div>
-              <p className="text-xs text-white/40 mb-1">Live Wait Time</p>
-              <p className="text-lg font-semibold text-green-400 flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                No Wait
-              </p>
+            <div className="flex items-center gap-3 mb-6 relative z-10">
+              <div className="p-2.5 bg-violet-500/20 rounded-xl">
+                <Bell className="text-violet-400" size={24} />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-white">Smart Reminders</h2>
+                <p className="text-sm text-white/40">Set custom alerts with audio beeps</p>
+              </div>
             </div>
-            <div className="h-10 w-px bg-white/10" />
-            <div>
-              <p className="text-xs text-white/40 mb-1">Resolution Rate</p>
-              <p className="text-lg font-semibold text-white">99.4%</p>
+
+            {/* Add Reminder Form */}
+            <form onSubmit={handleAddReminder} className="relative z-10 mb-8 flex gap-3">
+              <input
+                type="text"
+                value={reminderText}
+                onChange={(e) => setReminderText(e.target.value)}
+                placeholder="Remind me to..."
+                className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:border-violet-500/50 transition-colors"
+                required
+              />
+              <input
+                type="time"
+                value={reminderTime}
+                onChange={(e) => setReminderTime(e.target.value)}
+                className="w-32 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500/50 transition-colors [color-scheme:dark]"
+                required
+              />
+              <button
+                type="submit"
+                className="px-4 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-xl transition-colors flex items-center justify-center shrink-0"
+              >
+                <Plus size={20} />
+              </button>
+            </form>
+
+            {/* Reminders List */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3 relative z-10">
+              {reminders.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full opacity-30 py-8">
+                  <Bell size={40} className="mb-4" />
+                  <p>No active reminders</p>
+                </div>
+              ) : (
+                <AnimatePresence>
+                  {reminders.map((reminder) => (
+                    <motion.div
+                      key={reminder.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      className={`p-4 rounded-2xl border flex items-center justify-between gap-4 transition-colors ${
+                        reminder.completed 
+                          ? "bg-white/5 border-white/5 opacity-50" 
+                          : "bg-black/40 border-white/10 hover:border-violet-500/30"
+                      }`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-medium truncate ${reminder.completed ? "text-white/50 line-through" : "text-white/90"}`}>
+                          {reminder.text}
+                        </p>
+                        <p className="text-xs text-white/40 mt-1 flex items-center gap-1.5">
+                          <Clock size={12} />
+                          {new Date(reminder.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {reminder.completed && <span className="text-green-400 ml-2">• Completed</span>}
+                        </p>
+                      </div>
+                      
+                      <button
+                        onClick={() => removeReminder(reminder.id)}
+                        className="p-2 text-white/30 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors shrink-0"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              )}
             </div>
+
           </motion.div>
         </div>
 
