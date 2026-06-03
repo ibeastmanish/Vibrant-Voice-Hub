@@ -82,6 +82,36 @@ export const SupportDashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const extractProductFromUrl = (url: string) => {
+    try {
+      // Handle standard URL format
+      const urlObj = new URL(url);
+      const pathParts = urlObj.pathname.split('/').filter(Boolean);
+      
+      // Look for a slug (long string with hyphens)
+      for (const part of pathParts) {
+        if (part.length > 8 && part.includes('-') && !part.includes('ref=') && part !== 'dp' && part !== 'p') {
+          return part.split('-')
+            .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+            .join(' ')
+            .replace(/%20/g, ' ')
+            .replace(/[0-9a-fA-F]{10,}/g, ''); // Remove trailing hashes if any
+        }
+      }
+      
+      // Check query params for things like 'keywords=' or 'q='
+      const q = urlObj.searchParams.get('keywords') || urlObj.searchParams.get('q');
+      if (q) return q.charAt(0).toUpperCase() + q.slice(1);
+
+    } catch (e) {
+      // If not a valid URL, maybe they just typed the product name
+      if (!url.includes('http')) {
+        return url.charAt(0).toUpperCase() + url.slice(1);
+      }
+    }
+    return null;
+  };
+
   const handleTrackOrder = (e: React.FormEvent) => {
     e.preventDefault();
     if (!trackingLink.trim()) return;
@@ -91,14 +121,27 @@ export const SupportDashboard = () => {
 
     // Simulate AI parsing the URL and extracting order details
     setTimeout(() => {
-      const isAmazon = trackingLink.toLowerCase().includes("amazon");
-      const isFlipkart = trackingLink.toLowerCase().includes("flipkart");
+      const lowerLink = trackingLink.toLowerCase();
+      const isAmazon = lowerLink.includes("amazon");
+      const isFlipkart = lowerLink.includes("flipkart");
+      const isApple = lowerLink.includes("apple");
       
-      const storeName = isAmazon ? "Amazon" : isFlipkart ? "Flipkart" : "Online Store";
+      let storeName = "Online Store";
+      if (isAmazon) storeName = "Amazon";
+      else if (isFlipkart) storeName = "Flipkart";
+      else if (isApple) storeName = "Apple";
+      else if (lowerLink.includes(".")) {
+        const domain = new URL(trackingLink.startsWith("http") ? trackingLink : `https://${trackingLink}`).hostname;
+        storeName = domain.replace("www.", "").split(".")[0];
+        storeName = storeName.charAt(0).toUpperCase() + storeName.slice(1);
+      }
+      
+      const extractedProduct = extractProductFromUrl(trackingLink);
+      const finalItem = extractedProduct || (isAmazon ? "Sony WH-1000XM5 Headphones" : "Premium Wireless Earbuds");
       
       setOrder({
         id: `ORD-${Math.floor(Math.random() * 10000)}-${storeName.substring(0, 2).toUpperCase()}`,
-        item: isAmazon ? "Sony WH-1000XM5 Headphones" : "Nike Air Force 1",
+        item: finalItem,
         status: "in_transit",
         currentLocation: isAmazon ? "Dispatch Center, Bangalore" : "Sorting Hub, Mumbai",
         estimatedDelivery: "Tomorrow, by 9:00 PM",
