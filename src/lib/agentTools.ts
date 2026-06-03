@@ -76,28 +76,6 @@ export const TOOL_DEFINITIONS = [
   {
     type: "function",
     function: {
-      name: "issue_discount_code",
-      description:
-        "Issue a real personalised discount/coupon code to a customer as compensation or promotion. MUST be called when a customer is frustrated, reports a damaged/missing item, or asks for compensation.",
-      parameters: {
-        type: "object",
-        properties: {
-          percentage: {
-            type: "number",
-            description: "Discount percentage to offer (e.g. 20 for 20% off)",
-          },
-          reason: {
-            type: "string",
-            description: "Human-readable reason for the discount",
-          },
-        },
-        required: ["percentage", "reason"],
-      },
-    },
-  },
-  {
-    type: "function",
-    function: {
       name: "create_reminder",
       description:
         "Create a task or reminder for the customer that will appear in their task list.",
@@ -114,49 +92,6 @@ export const TOOL_DEFINITIONS = [
           },
         },
         required: ["text"],
-      },
-    },
-  },
-  {
-    type: "function",
-    function: {
-      name: "track_order",
-      description:
-        "Look up and return live order tracking information for the customer's most recent or specified order.",
-      parameters: {
-        type: "object",
-        properties: {
-          order_id: {
-            type: "string",
-            description: "Optional specific order ID to look up",
-          },
-        },
-      },
-    },
-  },
-  {
-    type: "function",
-    function: {
-      name: "process_refund",
-      description:
-        "Initiate a full or partial refund for a customer order. Returns a refund confirmation ID.",
-      parameters: {
-        type: "object",
-        properties: {
-          order_id: {
-            type: "string",
-            description: "The order ID to refund",
-          },
-          reason: {
-            type: "string",
-            description: "Reason for the refund",
-          },
-          amount: {
-            type: "number",
-            description: "Amount to refund in USD (omit for full refund)",
-          },
-        },
-        required: ["reason"],
       },
     },
   },
@@ -186,10 +121,7 @@ export type ToolName =
   | "get_weather"
   | "get_local_weather"
   | "get_exchange_rate"
-  | "issue_discount_code"
   | "create_reminder"
-  | "track_order"
-  | "process_refund"
   | "navigate_to_view";
 
 export const TOOL_ICONS: Record<ToolName, string> = {
@@ -197,10 +129,7 @@ export const TOOL_ICONS: Record<ToolName, string> = {
   get_weather: "🌤️",
   get_local_weather: "📍",
   get_exchange_rate: "💱",
-  issue_discount_code: "🎟️",
   create_reminder: "📝",
-  track_order: "📦",
-  process_refund: "💸",
   navigate_to_view: "🧭",
 };
 
@@ -209,10 +138,7 @@ export const TOOL_LABELS: Record<ToolName, string> = {
   get_weather: "Fetching live weather",
   get_local_weather: "Locating & fetching weather",
   get_exchange_rate: "Getting exchange rate",
-  issue_discount_code: "Issuing discount code",
   create_reminder: "Creating reminder",
-  track_order: "Tracking order",
-  process_refund: "Processing refund",
   navigate_to_view: "Navigating",
 };
 

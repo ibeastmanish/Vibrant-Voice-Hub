@@ -10,12 +10,6 @@ interface QuickAction {
 
 const ACTIONS: QuickAction[] = [
   {
-    icon: "📦",
-    label: "Track Order",
-    query: "Where is my recent order? Please track it for me.",
-    color: "from-blue-500/20 to-cyan-500/20 border-blue-500/30 hover:border-blue-400/60",
-  },
-  {
     icon: "🌦️",
     label: "Local Weather",
     query: "Fetch the weather for my exact current location using the get_local_weather tool.",
@@ -34,28 +28,10 @@ const ACTIONS: QuickAction[] = [
     color: "from-purple-500/20 to-violet-500/20 border-purple-500/30 hover:border-purple-400/60",
   },
   {
-    icon: "🎟️",
-    label: "Get Discount",
-    query: "I have been a loyal customer, can I get a discount code?",
-    color: "from-yellow-500/20 to-amber-500/20 border-yellow-500/30 hover:border-yellow-400/60",
-  },
-  {
-    icon: "↩️",
-    label: "Refund",
-    query: "I want to initiate a refund for my last order.",
-    color: "from-red-500/20 to-rose-500/20 border-red-500/30 hover:border-red-400/60",
-  },
-  {
     icon: "📅",
     label: "Set Reminder",
     query: "Set a reminder for me to follow up with customer support tomorrow morning.",
     color: "from-orange-500/20 to-amber-500/20 border-orange-500/30 hover:border-orange-400/60",
-  },
-  {
-    icon: "🏆",
-    label: "My Loyalty",
-    query: "What is my current loyalty tier and how many points do I have?",
-    color: "from-pink-500/20 to-fuchsia-500/20 border-pink-500/30 hover:border-pink-400/60",
   },
 ];
 

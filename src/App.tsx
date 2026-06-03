@@ -16,27 +16,11 @@ import { cn } from "./lib/utils";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { LoginScreen } from "./components/layout/LoginScreen";
-import { useVoiceContext } from "./context/VoiceContext";
-import { Play } from "lucide-react";
+
 import { ToastContainer } from "./components/ui/Toast";
 import { QuickActions } from "./components/voice/QuickActions";
 import { ConversationPanel } from "./components/voice/ConversationPanel";
 
-const DemoButton = () => {
-  const { processIntent } = useVoiceContext();
-  return (
-    <button
-      onClick={() => {
-        const demoTranscript = "I ordered a high-end laptop but the box arrived completely empty! I am absolutely furious. What kind of service is this?";
-        processIntent(demoTranscript);
-      }}
-      className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white/70 hover:bg-white/20 hover:text-white transition-all text-sm font-medium"
-    >
-      <Play size={14} />
-      Run Demo
-    </button>
-  );
-};
 
 const MainLayout = () => {
   const {
@@ -155,14 +139,6 @@ const MainLayout = () => {
 
                         <VoiceOrb />
 
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.4 }}
-                          className="mt-5"
-                        >
-                          <DemoButton />
-                        </motion.div>
 
                         {/* Quick Actions — tap to speak shortcuts */}
                         <QuickActions />

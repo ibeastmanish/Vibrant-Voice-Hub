@@ -188,86 +188,6 @@ export const VoiceProvider = ({ children }: { children: React.ReactNode }) => {
             });
           }
 
-          // ── Issue a real discount code ────────────────────────────────────
-          case "issue_discount_code": {
-            const code = `AURA-${Math.random()
-              .toString(36)
-              .substring(2, 8)
-              .toUpperCase()}`;
-            setDiscountCode({
-              code,
-              percentage: args.percentage,
-              reason: args.reason,
-            });
-            return JSON.stringify({
-              code,
-              percentage: args.percentage,
-              message: `Discount code ${code} (${args.percentage}% off) has been activated on your account.`,
-            });
-          }
-
-          // ── Create reminder / task ────────────────────────────────────────
-          case "create_reminder": {
-            const reminder = `${args.text}${args.time ? ` — ${args.time}` : ""}`;
-            setTasks((prev: string[]) => [...prev, reminder]);
-            return JSON.stringify({ success: true, reminder });
-          }
-
-          // ── Order tracking ────────────────────────────────────────────────
-          case "track_order": {
-            const orderId =
-              args.order_id ||
-              activeOrder?.id ||
-              `ORD-${Math.floor(Math.random() * 90000) + 10000}`;
-            const statuses = [
-              "Order Confirmed",
-              "Processing",
-              "Shipped",
-              "Out for Delivery",
-              "Delivered",
-            ];
-            const status = activeOrder?.status || statuses[2]; // Shipped by default
-            const eta = new Date(
-              Date.now() + 2 * 24 * 60 * 60 * 1000
-            ).toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "short",
-              day: "numeric",
-            });
-            const order = {
-              id: orderId,
-              status,
-              estimatedDelivery: eta,
-              trackingCarrier: "FedEx",
-              lastLocation: "Hyderabad Sorting Facility",
-              lastUpdate: new Date().toLocaleTimeString(),
-            };
-            setActiveOrder(order);
-            return JSON.stringify(order);
-          }
-
-          // ── Refund ────────────────────────────────────────────────────────
-          case "process_refund": {
-            const refundId = `REF-${Math.random()
-              .toString(36)
-              .substring(2, 8)
-              .toUpperCase()}`;
-            setActiveOrder((prev: any) =>
-              prev
-                ? { ...prev, status: "Refund Initiated" }
-                : {
-                    id: `ORD-${Math.floor(Math.random() * 90000) + 10000}`,
-                    status: "Refund Initiated",
-                  }
-            );
-            return JSON.stringify({
-              refundId,
-              status: "Initiated",
-              processingDays: "3-5 business days",
-              amount: args.amount ? `$${args.amount}` : "Full order amount",
-            });
-          }
-
           // ── Navigate ──────────────────────────────────────────────────────
           case "navigate_to_view": {
             setActiveView(args.view as any);
@@ -324,9 +244,6 @@ Current date: ${new Date().toLocaleDateString("en-US", { weekday: "long", year: 
 CRITICAL RULES:
 - You have access to powerful real tools. USE THEM. Do not guess or make up information — call the appropriate tool.
 - If the customer asks about weather, exchange rates, current events, or anything requiring real-time data → call the tool.
-- If the customer is frustrated, complains about a missing/broken item, or asks for compensation → IMMEDIATELY call issue_discount_code with at least 20%.
-- If asked to track an order → call track_order.
-- If asked for a refund → call process_refund.
 - If asked to search for something → call search_web.
 - After ALL tool calls complete, give a warm, personalised spoken response using the tool results.
 - Be concise in your final response — it will be spoken aloud.
@@ -414,10 +331,9 @@ Customer's task list: ${JSON.stringify(tasks)}`;
           const result = await executeTool(name, args);
           setAuditLogs((prev) => [...prev, { tool: name, args, result }]);
 
-          // Fire a toast for each tool result
           const summary = summariseResult(name, result);
           addToast({
-            type: name === "issue_discount_code" ? "discount" : "success",
+            type: "success",
             title: `${TOOL_ICONS[name] ?? "⚙️"} ${TOOL_LABELS[name] ?? name}`,
             description: summary,
           });
@@ -511,14 +427,6 @@ Customer's task list: ${JSON.stringify(tasks)}`;
         } else {
           stopListening();
         }
-      }
-      // Demo shortcut for judges
-      if (e.ctrlKey && e.shiftKey && e.key === "F") {
-        const demo =
-          "I ordered a high-end laptop but the box arrived completely empty! I am absolutely furious. What kind of service is this?";
-        setLiveTranscript(`You: ${demo}`);
-        setVoiceState("processing");
-        processIntentRef.current(demo);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -640,14 +548,8 @@ function summariseResult(tool: ToolName, raw: string): string {
         return `Local Weather: ${data.temperature}, ${data.condition}`;
       case "get_exchange_rate":
         return `1 ${data.from} = ${data.rate} ${data.to}`;
-      case "issue_discount_code":
-        return `Code: ${data.code} (${data.percentage}% off)`;
       case "create_reminder":
         return `Reminder set: ${data.reminder}`;
-      case "track_order":
-        return `${data.id} — ${data.status}`;
-      case "process_refund":
-        return `Refund ${data.refundId} initiated`;
       case "navigate_to_view":
         return `Navigated to ${data.navigatedTo}`;
       default:
