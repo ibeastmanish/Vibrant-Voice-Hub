@@ -17,8 +17,8 @@ const ACTIONS: QuickAction[] = [
   },
   {
     icon: "🌦️",
-    label: "Weather",
-    query: "What is the current weather in my city? Check Mumbai.",
+    label: "Local Weather",
+    query: "Fetch the weather for my exact current location using the get_local_weather tool.",
     color: "from-sky-500/20 to-teal-500/20 border-sky-500/30 hover:border-sky-400/60",
   },
   {
