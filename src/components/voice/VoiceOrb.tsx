@@ -4,11 +4,12 @@ import { Mic, Loader2 } from 'lucide-react';
 import { useVoiceContext } from '../../context/VoiceContext';
 import { useAppContext } from '../../context/AppContext';
 import { cn } from '../../lib/utils';
+import { AgentThoughts } from './AgentThoughts';
 
 
 
 export const VoiceOrb = ({ className }: { className?: string }) => {
-  const { voiceState, waveformLevels, startListening, stopListening, liveTranscript } = useVoiceContext();
+  const { voiceState, waveformLevels, startListening, stopListening, liveTranscript, userSentiment } = useVoiceContext();
   const { activeBrand } = useAppContext();
 
   const handleOrbClick = () => {
@@ -45,6 +46,10 @@ export const VoiceOrb = ({ className }: { className?: string }) => {
             "dark:shadow-[0_0_8px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.08),inset_3px_3px_0.5px_-3.5px_rgba(255,255,255,0.09),inset_-3px_-3px_0.5px_-3.5px_rgba(255,255,255,0.85),inset_1px_1px_1px_-0.5px_rgba(255,255,255,0.6),inset_-1px_-1px_1px_-0.5px_rgba(255,255,255,0.6),inset_0_0_6px_6px_rgba(255,255,255,0.12),inset_0_0_2px_2px_rgba(255,255,255,0.06),0_0_12px_rgba(0,0,0,0.15)]",
             voiceState === 'listening' 
               ? "ring-2 ring-red-500 shadow-[0_0_80px_rgba(239,68,68,0.4)]" 
+              : userSentiment === 'Frustrated'
+              ? "ring-2 ring-red-500 shadow-[0_0_40px_rgba(239,68,68,0.3)]"
+              : userSentiment === 'Positive'
+              ? "ring-2 ring-green-500 shadow-[0_0_40px_rgba(34,197,94,0.3)]"
               : "ring-1 ring-[#9b87f5]/40 hover:ring-[#9b87f5]"
           )}
           style={{ backdropFilter: 'url("#container-glass")' }}
@@ -90,6 +95,8 @@ export const VoiceOrb = ({ className }: { className?: string }) => {
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
             className={cn(
               "w-2 rounded-full min-h-[4px] transition-colors duration-500",
+              userSentiment === 'Frustrated' ? "bg-red-500" :
+              userSentiment === 'Positive' ? "bg-green-500" :
               activeBrand === 'Vyntra' ? "bg-primary" :
               activeBrand === 'Lovable' ? "bg-accent-pink" : 
               "bg-accent-green",
@@ -125,6 +132,9 @@ export const VoiceOrb = ({ className }: { className?: string }) => {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Real-time Agent Tool Execution Panel */}
+      <AgentThoughts />
     </div>
   );
 };

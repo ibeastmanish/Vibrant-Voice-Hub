@@ -3,25 +3,19 @@ import { MessageSquare, User, Sparkles } from "lucide-react";
 import { useVoiceContext } from "../../context/VoiceContext";
 import { useAppContext } from "../../context/AppContext";
 import { PromptInputBox } from "../ui/ai-prompt-box";
+import Linkify from 'linkify-react';
 
 export const ChatCanvas = () => {
-  const { conversationHistory, liveTranscript, processIntent } = useVoiceContext();
-  const { isGuest } = useAppContext();
+  const { conversationHistory, liveTranscript, processIntent, voiceState } = useVoiceContext();
+  const { customerName } = useAppContext();
   
-  const guestSuggestions = [
-    "Analyze this image (attach an image)",
-    "Add a reminder to call support tomorrow"
+  const suggestions = [
+    "Where is my recent order?",
+    "I want to return my last purchase",
+    "What is my loyalty tier and points?",
+    "How do I contact Amazon support?",
+    "Set a reminder to follow up tomorrow",
   ];
-  
-  const alexSuggestions = [
-    "Cancel my active MacBook order",
-    "Process a refund for my headphones",
-    "What is my current loyalty tier?",
-    "Analyze this image (attach an image)",
-    "Add a reminder to call support tomorrow"
-  ];
-
-  const suggestions = isGuest ? guestSuggestions : alexSuggestions;
 
   return (
     <div className="flex h-full flex-col max-w-4xl mx-auto w-full glass-panel p-8 shadow-2xl">
@@ -40,12 +34,10 @@ export const ChatCanvas = () => {
           <div className="text-center py-20 flex flex-col items-center justify-center">
             <Sparkles size={48} className="text-primary/50 mb-6" />
             <h3 className="text-2xl font-bold text-white mb-2">
-              {isGuest ? "How can I help you today?" : "How can I help you, Guest?"}
+              How can I help you, {customerName}?
             </h3>
             <p className="text-white/50 mb-8 max-w-md">
-              {isGuest 
-                ? "Try asking a question or upload an image for me to analyze." 
-                : "Try asking about your recent orders, policies, or even upload an image for me to analyze."}
+              Ask about your orders, get policy help, request refunds, or just say hello to Aura.
             </p>
 
             <div className="flex flex-wrap gap-3 justify-center max-w-2xl">
@@ -74,7 +66,11 @@ export const ChatCanvas = () => {
                 {msg.role === 'user' ? <User size={18} /> : <Sparkles size={18} />}
               </div>
               <div className={`rounded-2xl p-5 ${msg.role === 'user' ? 'bg-white/10 text-white' : 'bg-primary/10 border border-primary/20 text-white'}`}>
-                <p className="leading-relaxed">{msg.content}</p>
+                <p className="leading-relaxed">
+                  <Linkify options={{ className: 'text-primary underline hover:text-primary/80 transition-colors', target: '_blank' }}>
+                    {msg.content}
+                  </Linkify>
+                </p>
               </div>
             </div>
           </motion.div>
@@ -93,7 +89,7 @@ export const ChatCanvas = () => {
         )}
 
         {/* Processing Indicator */}
-        {useVoiceContext().voiceState === 'processing' && !liveTranscript && (
+        {voiceState === 'processing' && !liveTranscript && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -115,18 +111,9 @@ export const ChatCanvas = () => {
 
       <div className="mt-4 shrink-0 pb-4">
         <PromptInputBox
-          onSend={(message, files) => {
+          onSend={(message) => {
             if (message.startsWith("[Voice message")) return;
-            if (files && files.length > 0) {
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                const base64Image = e.target?.result as string;
-                processIntent(message, base64Image);
-              };
-              reader.readAsDataURL(files[0]);
-            } else {
-              processIntent(message);
-            }
+            processIntent(message);
           }}
           placeholder="Ask everything"
         />

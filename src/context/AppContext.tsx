@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 
 export type Brand = "Vyntra";
-export type View = "Dashboard" | "Admin" | "Search" | "Support" | "Chat";
+export type View = "Dashboard" | "Search" | "Support" | "Chat" | "Accessibility" | "Profile";
 
 export interface Citation {
   id: number;
@@ -33,6 +33,23 @@ interface AppContextType {
 
   citations: Citation[];
   setCitations: (citations: Citation[]) => void;
+
+  highContrast: boolean;
+  setHighContrast: (val: boolean) => void;
+  textSize: number;
+  setTextSize: (val: number) => void;
+  reducedMotion: boolean;
+  setReducedMotion: (val: boolean) => void;
+  focusMode: boolean;
+  setFocusMode: (val: boolean) => void;
+
+  hasSelectedInterests: boolean;
+  setHasSelectedInterests: (val: boolean) => void;
+  selectedInterests: string[];
+  setSelectedInterests: (val: string[]) => void;
+
+  discountCode: { code: string; percentage: number; reason: string } | null;
+  setDiscountCode: (val: { code: string; percentage: number; reason: string } | null) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -47,6 +64,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [tasks, setTasks] = useState<string[]>([]);
 
   const [citations, setCitations] = useState<Citation[]>([]);
+
+  const [highContrast, setHighContrast] = useState(false);
+  const [textSize, setTextSize] = useState(3);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
+
+  const [hasSelectedInterests, setHasSelectedInterests] = useState(false);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [discountCode, setDiscountCode] = useState<{ code: string; percentage: number; reason: string } | null>(null);
 
   return (
     <AppContext.Provider
@@ -69,6 +95,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
         citations,
         setCitations,
+        
+        highContrast,
+        setHighContrast,
+        textSize,
+        setTextSize,
+        reducedMotion,
+        setReducedMotion,
+        focusMode,
+        setFocusMode,
+
+        hasSelectedInterests,
+        setHasSelectedInterests,
+        selectedInterests,
+        setSelectedInterests,
+
+        discountCode,
+        setDiscountCode,
       }}
     >
       {children}
